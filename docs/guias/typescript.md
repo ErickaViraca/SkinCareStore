@@ -101,7 +101,11 @@ El proyecto usa el modo más estricto razonable (`tsconfig.json`):
 
 ## 8. Nombres y comentarios
 
-**Idioma:** el **código en inglés** (nombres de archivos, variables, funciones, tipos, tablas y columnas); **los textos que ven las usuarias, los comentarios y la documentación en español**. Así el código es coherente con las librerías y con el esquema de la base, y todo lo que se lee como explicación queda en español. El glosario de la sección 8.1 conecta ambos idiomas.
+**Idioma:**
+- **El código es siempre en inglés, sin excepciones:** nombres de archivos, carpetas, variables, funciones, tipos, tablas, columnas, rutas internas y valores de las uniones (`"cash" | "qr"`). Se revisa al revisar cada PR.
+- **Lo que ve la usuaria es siempre en español:** etiquetas, botones, títulos, mensajes de error, avisos y textos de formularios. El producto es para personas que hablan español.
+- **Comentarios y documentación en español**, para que cualquiera del equipo los entienda.
+- El **glosario** (sección 8.1) indica qué palabra en español se muestra en la interfaz para cada concepto del código.
 
 | Elemento | Convención | Ejemplo |
 |---|---|---|
@@ -115,24 +119,26 @@ El proyecto usa el modo más estricto razonable (`tsconfig.json`):
 2. **Los comentarios explican el porqué, no el qué.** El código ya dice qué hace.
 3. **Sin `export default`**, salvo en los archivos que Next.js exige (`page.tsx`, `layout.tsx`, etc.). Los nombres explícitos facilitan buscar y refactorizar.
 
-### 8.1 Glosario
+### 8.1 Glosario: código → interfaz
 
-| Español | Código |
+Para cada concepto, el nombre en el código (inglés) y el texto que se muestra en la interfaz (español). Los textos de la UI se toman de esta tabla para que el panel use siempre las mismas palabras.
+
+| Código (inglés) | Interfaz (español) |
 |---|---|
-| producto / variante | `product` / `variant` |
-| tono / presentación | `shade` / `presentation` |
-| lote / vencimiento | `lot` / `expiresOn` |
-| compra / proveedor | `purchase` / `supplier` |
-| venta / ítem de venta | `sale` / `saleItem` |
-| movimiento de stock | `stockMovement` |
-| costo real / costo promedio | `landedUnitCost` / `averageCost` |
-| precio mínimo / oferta | `minimumPrice` / `offer` |
-| cuadre | `inventoryCount` |
-| caja / banco / cuenta | `cash` / `bank` / `moneyAccount` |
-| socia / aporte / retiro | `partner` / `contribution` / `withdrawal` |
-| reparto de ganancias | `profitDistribution` |
-| gasto / gasto recurrente | `expense` / `recurringExpense` |
-| centavos | `Cents` |
+| `product` / `variant` | producto / variante |
+| `shade` / `presentation` | tono / presentación |
+| `lot` / `expiresOn` | lote / vencimiento |
+| `purchase` / `supplier` | compra / proveedor |
+| `sale` / `saleItem` | venta / ítem de venta |
+| `stockMovement` | movimiento de stock |
+| `landedUnitCost` / `averageCost` | costo real / costo promedio |
+| `minimumPrice` / `offer` | precio mínimo / oferta |
+| `inventoryCount` | cuadre |
+| `cash` / `bank` / `moneyAccount` | caja / banco / cuenta |
+| `partner` / `contribution` / `withdrawal` | socia / aporte / retiro |
+| `profitDistribution` | reparto de ganancias |
+| `expense` / `recurringExpense` | gasto / gasto recurrente |
+| `Cents` | centavos |
 
 ---
 

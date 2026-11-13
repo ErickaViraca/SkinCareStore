@@ -15,7 +15,7 @@ Antes de escribir código, leer y seguir:
 1. `docs/ESPECIFICACION.md` — qué hace el sistema y sus reglas de negocio (aprobada; los cambios se discuten antes).
 2. `docs/guias/backend.md` — capas, DTOs, errores, logs, tests.
 3. `docs/guias/frontend.md` — componentes reutilizables, servidor/cliente, formularios.
-4. `docs/guias/typescript.md` — tipos, dinero en centavos, validación, nombres (código en inglés, textos y comentarios en español).
+4. `docs/guias/typescript.md` — tipos, dinero en centavos, validación, nombres (código siempre en inglés; textos de la interfaz, comentarios y documentación en español).
 
 Obligatorio en cada cambio:
 
