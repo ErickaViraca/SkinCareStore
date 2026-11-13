@@ -1,17 +1,20 @@
-# Dependabot: propone pull requests para actualizar dependencias y avisa de
-# vulnerabilidades conocidas. Cada PR pasa por el CI antes de poder mergearse.
+# Dependabot: como máximo UN pull request al mes, con todas las actualizaciones
+# menores y de parches de npm agrupadas. Las versiones mayores (por ejemplo
+# TypeScript 7 o ESLint 10) se ignoran: se actualizan a propósito, probando con calma.
+#
+# Las vulnerabilidades de seguridad no dependen de este archivo: se activan en
+# GitHub → Settings → Code security → Dependabot security updates.
 version: 2
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-      day: monday
-    open-pull-requests-limit: 5
-    groups:
-      dependencias-menores:
-        update-types: [minor, patch]
-  - package-ecosystem: github-actions
-    directory: /
-    schedule:
       interval: monthly
+    open-pull-requests-limit: 1
+    groups:
+      actualizacion-mensual:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
