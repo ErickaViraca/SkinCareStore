@@ -283,11 +283,15 @@ precio de oferta  = costo real del lote + ganancia × (1 − descuento del escal
 | 3 meses | 25% → 15 Bs | 275,00 |
 | 2 meses | 50% → 30 Bs | 260,00 |
 
-- **Sin redondeo:** se muestra el valor calculado (con decimales), para que el descuento se note.
+- **Redondeo a 0,10 hacia abajo:** no se aplica la regla 5 / 9,90; se muestra el valor calculado con decimales, para que el descuento se note, redondeado a 0,10 hacia abajo para facilitar el cobro en efectivo (por ejemplo 283,47 → 283,40). Si al redondear quedara por debajo del costo real, se redondea hacia arriba.
 - **Nunca por debajo del costo real.** Es la única excepción al margen mínimo de 25%.
-- La oferta termina sola cuando se venden esas unidades. En la web aparece con el precio normal tachado, en la sección **Ofertas**, con la leyenda **"Hasta agotar stock"**.
+- La oferta **termina sola** en cualquiera de estos dos casos:
+  1. se vendieron todas las unidades de ese lote, o
+  2. el lote **llegó a su fecha de vencimiento** sin venderse.
+
+  En la web aparece con el precio normal tachado, en la sección **Ofertas**, con la leyenda **"Hasta agotar stock"**.
 - Los porcentajes y los meses se editan en Configuración.
-- Si un lote vence sin venderse, se registra como movimiento `expired`: sale del stock y su costo cuenta como **pérdida**.
+- **Unidades vencidas:** desde su fecha de vencimiento **no se pueden vender** (el sistema las salta al vender y deja de contarlas como disponibles en la web). El panel avisa para darlas de baja: se registran como movimiento `expired`, salen del stock y su costo cuenta como **pérdida**.
 - **El vencimiento nunca se muestra en la página pública**, solo en el panel.
 
 ### 4.9 Pago de ventas
@@ -410,10 +414,9 @@ ventas
 
 ---
 
-## 9. Detalles menores a confirmar durante la implementación
+## 9. Datos a cargar después
 
-- Precio de oferta con centavos (por ejemplo 283,47): se muestra tal cual, redondeado al centavo. Si en efectivo resulta incómodo, se puede redondear a 0,10 hacia abajo (sin bajar del costo).
-- Capital inicial de Vanessa y Ericka para arrancar el módulo de capital.
+- **Capital inicial** de Vanessa y Ericka: se carga cuando esté definido. El módulo de capital funciona desde el inicio, aunque empiece sin aportes registrados.
 
 ---
 
@@ -444,7 +447,7 @@ ventas
 | 10 | Redondeo: exacto → 5 → 9,90, hacia arriba |
 | 11 | Subida automática de precio con aviso; nunca baja solo; el panel no permite precios bajo el mínimo |
 | 12 | Precio cobrado nunca menor al costo real; descuentos y por mayor quedan para después |
-| 13 | Ofertas automáticas por vencimiento: 6 / 3 / 2 meses → 10% / 25% / 50% de la ganancia, solo para las unidades de ese lote, sin redondeo, nunca bajo costo, editables |
+| 13 | Ofertas automáticas por vencimiento: 6 / 3 / 2 meses → 10% / 25% / 50% de la ganancia, solo para las unidades de ese lote, redondeo a 0,10 hacia abajo, nunca bajo costo, editables. La oferta termina al venderse esas unidades o al vencer el lote |
 | 14 | El vencimiento solo se ve en el panel |
 | 15 | Página pública: disponible / últimas unidades / agotado, sin cantidad exacta |
 | 16 | Venta con varios medios de pago; efectivo → Caja; QR y transferencia → Banco; sin tarjeta |
@@ -455,3 +458,5 @@ ventas
 | 21 | Gastos con categorías y gastos recurrentes (alquiler de dos armarios, 400 Bs/mes) |
 | 22 | Cierre de caja opcional, sin fondo de cambio obligatorio |
 | 23 | Dominio `.com` en Cloudflare, con "bolivia" en el nombre |
+| 24 | Las unidades vencidas no se pueden vender; se dan de baja como pérdida |
+| 25 | Capital inicial de las socias se carga después |
