@@ -225,6 +225,8 @@ costo real = (cantidad pagada × precio unitario + parte del envío)
              / (cantidad pagada + unidades de regalo del mismo producto)
 ```
 - **Envío:** se reparte **por igual entre todas las unidades** de la compra (pagadas y de regalo).
+- **Redondeo:** el costo real se guarda en centavos y se redondea **hacia arriba**. Así el costo nunca se subestima: el precio mínimo nunca queda corto y la utilidad nunca se infla. La diferencia es de menos de 1 centavo por unidad.
+- Las líneas de regalo de otro producto no reciben parte del envío (cuestan 0, §4.3).
 - Ejemplo: 10 Active Unify a 220 + 1 de regalo, y otros 9 productos en la misma compra; envío 20 Bs → 1 Bs por unidad → (2.200 + 11) / 11 = **201 Bs**.
 
 ### 4.3 Regalos de otro producto
@@ -513,3 +515,4 @@ Las credenciales de producción nunca están disponibles en los tests ni en GitH
 | 27 | Tests: unitarios, integración, secuencias aleatorias, concurrencia y permisos; PGlite + Postgres en contenedor; nunca contra Neon |
 | 28 | Entornos separados: tests (temporal), desarrollo (rama de Neon) y producción |
 | 29 | Cálculos de costo y precio con precisión exacta (fracciones de centavo); se redondea una sola vez, al final |
+| 30 | El costo real por unidad de cada lote se guarda redondeado hacia arriba al centavo (nunca se subestima el costo) |
