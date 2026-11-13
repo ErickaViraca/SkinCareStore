@@ -44,8 +44,15 @@ export default defineConfig({
       provider: "v8",
       include: ["src/domain/**", "src/server/**", "src/lib/**"],
       reporter: ["text", "html"],
-      // Mínimos de cobertura. En la etapa 2 se suben para src/domain (lógica de dinero y stock).
-      thresholds: { statements: 85, lines: 85, functions: 80, branches: 80 },
+      // Mínimos de cobertura.
+      thresholds: {
+        statements: 85,
+        lines: 85,
+        functions: 80,
+        branches: 80,
+        // La lógica de dinero y stock exige más cobertura (etapa 2).
+        "src/domain/**": { statements: 95, lines: 95, functions: 95, branches: 95 },
+      },
     },
   },
 });
