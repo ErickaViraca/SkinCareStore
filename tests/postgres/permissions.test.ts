@@ -53,14 +53,20 @@ describe.skipIf(!hasTestDatabase)("permisos de los usuarios de base de datos", (
       });
     });
 
-    it.each(["lots", "sales", "purchases", "suppliers", "capital_movements", "product_variants", "v_variant_stock"])(
-      "no puede leer %s",
-      async (table) => {
-        await asRole("soleil_web", async (client) => {
-          await expect(client.query(`SELECT * FROM ${table}`)).rejects.toMatchObject(PERMISSION_DENIED);
-        });
-      },
-    );
+    it.each([
+      "lots",
+      "sales",
+      "purchases",
+      "suppliers",
+      "capital_movements",
+      "product_variants",
+      "v_variant_stock",
+      "v_variant_pricing",
+    ])("no puede leer %s", async (table) => {
+      await asRole("soleil_web", async (client) => {
+        await expect(client.query(`SELECT * FROM ${table}`)).rejects.toMatchObject(PERMISSION_DENIED);
+      });
+    });
 
     it("no puede escribir", async () => {
       await asRole("soleil_web", async (client) => {

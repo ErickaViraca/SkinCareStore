@@ -198,7 +198,8 @@ Socias iniciales: **Vanessa** y **Ericka**.
 | Vista | Uso |
 |---|---|
 | `v_lot_stock` 🔒 | Saldo por lote, vencimiento, escalón de vencimiento |
-| `v_variant_stock` 🔒 | Stock, costo promedio, precio mínimo, estado de alerta |
+| `v_variant_stock` 🔒 | Stock total y vendible, estado de alerta |
+| `v_variant_pricing` 🔒 | Costo promedio y precio mínimo (misma lógica que el código; ver §4.5) |
 | `v_account_balance` 🔒 | Saldo de Caja y Banco |
 | `v_partner_capital` 🔒 | Capital, porcentaje y ganancias por socia |
 | `public_catalog` | Para la página pública (ver sección 6) |
@@ -299,6 +300,7 @@ precio de oferta  = costo real del lote + ganancia × (1 − descuento del escal
 - Los porcentajes y los meses se editan en Configuración.
 - **Unidades vencidas:** desde su fecha de vencimiento **no se pueden vender** (el sistema las salta al vender y deja de contarlas como disponibles en la web). El panel avisa para darlas de baja: se registran como movimiento `expired`, salen del stock y su costo cuenta como **pérdida**.
 - **El vencimiento nunca se muestra en la página pública**, solo en el panel.
+- El cálculo de ofertas está en `src/domain/offers.ts`. El precio de oferta se agrega a `public_catalog` junto con el servicio de ventas (etapa 4), que es el que aplica la oferta al vender.
 
 ### 4.9 Pago de ventas
 - Una venta puede pagarse con **varios medios** (por ejemplo, parte en efectivo y parte por QR).

@@ -91,6 +91,11 @@ export const productVariants = pgTable(
       "product_variants_margin_fixed_non_negative",
       sql`${table.marginFixedBs} IS NULL OR ${table.marginFixedBs} >= 0`,
     ),
+    // Los modos "fijo" y "el mayor" necesitan un monto fijo (§4.5).
+    check(
+      "product_variants_fixed_margin_required",
+      sql`${table.marginMode} IS NULL OR ${table.marginMode} = 'pct' OR ${table.marginFixedBs} IS NOT NULL`,
+    ),
   ],
 );
 
