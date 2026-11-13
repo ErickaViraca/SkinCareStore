@@ -43,6 +43,12 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    // Las columnas de Drizzle tienen tipos inferidos muy largos y propios de la librería;
+    // escribirlos a mano no aporta seguridad y dificulta leer el esquema.
+    files: ["src/db/schema/**/*.ts"],
+    rules: { "@typescript-eslint/explicit-module-boundary-types": "off" },
+  },
+  {
     // Los tests pueden ser más largos y usar valores de prueba.
     files: ["tests/**/*.ts"],
     rules: {

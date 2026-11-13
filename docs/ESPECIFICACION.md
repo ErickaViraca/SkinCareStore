@@ -129,7 +129,7 @@ docs/         especificación y decisiones
 
 **stock_movements**
 - `id, variant_id, lot_id, quantity` (con signo)
-- `type`: initial | purchase | sale | sale_void | adjustment | expired | damaged | sample | supplier_return | count
+- `type`: initial | purchase | purchase_void | sale | sale_void | adjustment | expired | damaged | sample | supplier_return | count
 - `purchase_id, sale_item_id, count_id, reason, created_by, created_at`
 
 **inventory_counts** (cuadre) — `id, counted_at, status (open | closed), notes, created_by`
@@ -161,7 +161,7 @@ Si una venta toma unidades de dos lotes, se guarda una línea por lote. Así la 
 
 **money_movements** — todo ingreso y egreso de dinero
 - `id, account_id, amount_bs` (con signo)
-- `type`: sale | sale_void | purchase | transfer | capital_in | capital_out | profit_out | expense | cash_adjustment
+- `type`: sale | sale_void | purchase | purchase_void | transfer | capital_in | capital_out | profit_out | expense | expense_void | cash_adjustment
 - referencias: `sale_id, purchase_id, expense_id, capital_movement_id, transfer_id`
 - `note, created_by, created_at`
 
