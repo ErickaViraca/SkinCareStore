@@ -1,0 +1,84 @@
+# Verificación automática de cada pull request (ver docs/ESPECIFICACION.md §7.4).
+# Corre en máquinas virtuales temporales de GitHub: no usa ni conoce la base de producción.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calidad:
+    name: calidad
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Formato (Prettier)
+        run: npm run format:check
+      - name: Reglas de código (ESLint)
+        run: npm run lint
+      - name: Tipos (TypeScript)
+        run: npm run typecheck
+      - name: Arquitectura y dependencias circulares
+        run: npm run arch
+      - name: Código y dependencias sin usar
+        run: npm run unused
+      - name: Build de Next.js
+        run: npm run build
+
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Tests unitarios, de propiedades e integración (PGlite) con cobertura
+        run: npm run test:coverage
+
+  tests-postgres:
+    name: tests-postgres
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      # Postgres temporal: existe solo mientras corre este job y se destruye al terminar.
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: soleil_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL_TEST: postgresql://postgres:test@localhost:5432/soleil_test
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Tests de concurrencia y permisos (Postgres real)
+        run: npm run test:postgres
