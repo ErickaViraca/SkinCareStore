@@ -1,7 +1,7 @@
 # Soleil — Sistema de gestión (panel privado)
 
-Especificación para revisar **antes de programar**.
-Versión 2 — incorpora todas las decisiones de la revisión (ver sección 11).
+Especificación del sistema.
+Versión 3 — **aprobada**. Incorpora todas las decisiones de la revisión (ver sección 11).
 
 ---
 
@@ -40,8 +40,8 @@ Sistema privado para administrar la tienda de dermocosmética **Soleil** (Cochab
 | Login | Google (Auth.js), solo los emails autorizados |
 | Hosting | Vercel (proyecto nuevo) |
 | Dominio | `.com` comprado en Cloudflare, con "bolivia" en el nombre (por ejemplo `soleilbolivia.com`; disponibilidad a confirmar) |
-| Tests | Vitest + pruebas con secuencias aleatorias (fast-check) + pruebas contra Postgres real |
-| CI | GitHub Actions: formato, tipos y tests. No se integra código si algo falla |
+| Tests | Vitest (unitarios, integración, secuencias aleatorias con fast-check) sobre PGlite y Postgres en contenedor (ver sección 7) |
+| CI | GitHub Actions en cada pull request; `main` protegida: no se mergea nada con tests en rojo |
 
 **Estructura del repositorio:**
 
@@ -206,6 +206,8 @@ Socias iniciales: **Vanessa** y **Ericka**.
 
 La página pública y el futuro agente de WhatsApp usan un usuario de base de datos que **solo puede leer las vistas `public_*`**.
 
+**Cómo funcionan:** una vista es una **consulta SQL guardada con nombre**. Se consulta como una tabla, pero **no guarda datos**: se calcula en el momento de cada consulta, sobre los datos actuales de las tablas. Por eso siempre está actualizada, sin procesos de recálculo. No se usan vistas materializadas (las que guardan resultados y hay que refrescar). Las vistas privadas evitan repetir cálculos en el panel; las públicas son la ventana controlada que alimenta la página pública.
+
 ---
 
 ## 4. Reglas de negocio
@@ -314,7 +316,13 @@ Sección **"¿Con qué dinero se pagó?"**, con una o varias líneas:
 ### 4.11 Dinero (Caja y Banco)
 - El saldo de cada cuenta = suma de sus movimientos. Nunca se edita a mano.
 - **Depósito:** traspaso de Caja a Banco (dos movimientos enlazados).
-- **Cierre de caja (opcional):** el sistema muestra el efectivo esperado; ustedes registran lo contado y la diferencia queda con su motivo. No hay fondo de cambio obligatorio.
+- **Cierre de caja (opcional, solo efectivo):**
+  1. El panel muestra el **resumen del día**: ventas totales, cuánto entró en efectivo y cuánto por QR o transferencia.
+  2. Muestra el **efectivo esperado**: lo que había + ventas en efectivo − salidas de caja (depósitos, gastos en efectivo).
+  3. Ustedes cuentan el efectivo y escriben el monto.
+  4. Si no coincide, la diferencia queda registrada con un motivo.
+  - El **banco** no se cierra a diario en el sistema: el resumen del día indica cuánto entró por QR o transferencia, y se compara con la app del banco.
+  - Si un día no se hace el cierre, el sistema sigue funcionando. No hay fondo de cambio obligatorio.
 
 ### 4.12 Capital de las socias
 - **Capital de cada socia** = aportes − retiros de capital.
@@ -338,7 +346,7 @@ ventas
 
 ### 4.14 Gastos
 - Cada gasto se registra con su categoría, cuenta de origen y descripción.
-- **Gastos recurrentes:** cada mes el sistema deja **pendiente de confirmar** el gasto de la plantilla (por ejemplo, alquiler de 400 Bs). Al confirmarlo se elige la cuenta y queda registrado.
+- **Gastos recurrentes:** se define una plantilla (por ejemplo, "Alquiler de dos armarios, 400 Bs, día 1"). Cada mes, ese día, el panel muestra el aviso *"Alquiler de noviembre, 400 Bs. ¿Ya se pagó?"*. Cuando se paga, se toca **Confirmar**, se elige si salió de Caja o del Banco y, si cambió, se corrige el monto. Recién ahí queda registrado. No se registra solo porque puede pagarse otro día, desde otra cuenta o por otro monto; el aviso sirve para que no se olvide.
 
 ### 4.15 Alertas del panel
 - Stock bajo (stock ≤ stock mínimo).
@@ -383,19 +391,58 @@ ventas
 
 ---
 
-## 7. Calidad
+## 7. Calidad, tests y entornos
 
-- Toda la lógica de `src/domain` con tests unitarios antes de usarse.
-- **Pruebas con secuencias aleatorias** de compras, ventas, anulaciones, ajustes, gastos y movimientos de capital que verifican siempre:
-  - el stock nunca es negativo, y la suma de saldos por lote = stock de la variante;
-  - el precio normal nunca es menor al mínimo;
-  - ningún precio cobrado ni de oferta es menor al costo real del lote;
-  - los pagos de cada venta y de cada compra suman su total;
-  - el saldo de cada cuenta = suma de sus movimientos;
-  - lo repartido nunca supera la ganancia acumulada, y lo retirado por cada socia nunca supera lo que le tocó;
-  - ganancia neta = ventas − costo de lo vendido − gastos − pérdidas.
-- Pruebas contra Postgres real de transacciones, bloqueos y restricciones.
-- CI obligatorio en GitHub Actions.
+### 7.1 Niveles de tests (todos con Vitest, en el servidor)
+
+| Nivel | Qué prueba | Base de datos |
+|---|---|---|
+| **Unitarios** | Cada función de `src/domain` por separado, con su resultado esperado (por ejemplo, precio de oferta 290 / 230 / 10% → 284,00) | Ninguna |
+| **Integración (camino completo)** | Flujos enteros: compra → venta de dos lotes → anulación → stock, costo, utilidad, saldos y aportes esperados | PGlite |
+| **Secuencias aleatorias** | Miles de combinaciones de compras, ventas, anulaciones, ajustes, gastos y movimientos de capital | PGlite |
+| **Concurrencia y permisos** | Dos ventas simultáneas de la última unidad; el usuario de la web solo puede leer `public_*` | Postgres en contenedor |
+| **Pantallas** (más adelante) | Flujos clave del panel, como la venta rápida, con un navegador automatizado | PGlite o contenedor |
+
+**Reglas que las secuencias aleatorias verifican siempre:**
+- el stock nunca es negativo, y la suma de saldos por lote = stock de la variante;
+- el precio normal nunca es menor al mínimo;
+- ningún precio cobrado ni de oferta es menor al costo real del lote;
+- no se venden unidades vencidas;
+- los pagos de cada venta y de cada compra suman su total;
+- el saldo de cada cuenta = suma de sus movimientos;
+- lo repartido nunca supera la ganancia acumulada, y lo retirado por cada socia nunca supera lo que le tocó;
+- ganancia neta = ventas − costo de lo vendido − gastos − pérdidas.
+
+### 7.2 Bases de datos para tests
+
+Ningún test toca Neon. Las dos opciones usan el mismo motor Postgres, empiezan vacías y se descartan al terminar:
+
+| | **PGlite** | **Postgres en contenedor** |
+|---|---|---|
+| Qué es | Postgres en memoria, dentro del proceso de los tests | Servidor Postgres completo, de la misma versión que Neon |
+| Dónde corre | En cualquier lado (computadora, sesión, GitHub) | En GitHub Actions |
+| Arranque | ~1 segundo | ~10–20 segundos |
+| Conexiones simultáneas y bloqueos | No | Sí |
+| Permisos entre usuarios | Limitado | Igual que en Neon |
+| Uso | ~95% de los tests | Concurrencia y permisos |
+
+### 7.3 Entornos
+
+| Entorno | Base de datos | Uso |
+|---|---|---|
+| Tests | PGlite / contenedor temporal | Tests automáticos; se crean y destruyen en cada ejecución |
+| Desarrollo | Rama de desarrollo de Neon (copia aislada) | Probar el panel mientras se programa |
+| Producción | Rama principal de Neon | El sistema real |
+
+Las credenciales de producción nunca están disponibles en los tests ni en GitHub Actions.
+
+### 7.4 Flujo de trabajo con pull requests
+
+1. Cada cambio se hace en una **rama** y se propone con un **pull request (PR)**.
+2. **GitHub Actions** corre automáticamente en cada PR, en una máquina virtual temporal: formato, tipos, tests en PGlite y tests en el contenedor. El resultado (✅ / ❌) aparece en el PR.
+3. La rama `main` está **protegida**: no se puede mergear un PR con ❌ ni subir código directo a `main`.
+4. Con ✅, se revisa y se mergea. No hace falta una segunda aprobación.
+5. Vercel publica a producción solo desde `main`.
 
 ---
 
@@ -460,3 +507,6 @@ ventas
 | 23 | Dominio `.com` en Cloudflare, con "bolivia" en el nombre |
 | 24 | Las unidades vencidas no se pueden vender; se dan de baja como pérdida |
 | 25 | Capital inicial de las socias se carga después |
+| 26 | Trabajo con pull requests; `main` protegida; GitHub Actions corre los tests en cada PR |
+| 27 | Tests: unitarios, integración, secuencias aleatorias, concurrencia y permisos; PGlite + Postgres en contenedor; nunca contra Neon |
+| 28 | Entornos separados: tests (temporal), desarrollo (rama de Neon) y producción |
