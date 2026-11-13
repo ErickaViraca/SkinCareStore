@@ -257,6 +257,8 @@ precio mínimo = redondeo(resultado)
 | 255,01 a 259,90 | 259,90 |
 | 259,91 a 265,00 | 265 |
 
+**Precisión:** el costo promedio y el precio mínimo se calculan de forma exacta, aunque den fracciones de centavo (por ejemplo 201,3636… Bs), y se redondean **una sola vez, al final**. Así un precio nunca queda un centavo por debajo del mínimo real.
+
 Se aplica a los precios que **calcula** el sistema. Un precio puesto a mano puede ser cualquiera, siempre que no sea menor al mínimo.
 
 ### 4.6 Precio de venta normal
@@ -510,3 +512,4 @@ Las credenciales de producción nunca están disponibles en los tests ni en GitH
 | 26 | Trabajo con pull requests; `main` protegida; GitHub Actions corre los tests en cada PR |
 | 27 | Tests: unitarios, integración, secuencias aleatorias, concurrencia y permisos; PGlite + Postgres en contenedor; nunca contra Neon |
 | 28 | Entornos separados: tests (temporal), desarrollo (rama de Neon) y producción |
+| 29 | Cálculos de costo y precio con precisión exacta (fracciones de centavo); se redondea una sola vez, al final |
