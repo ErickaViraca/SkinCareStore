@@ -1,0 +1,1 @@
+ALTER TABLE "product_variants" ADD CONSTRAINT "product_variants_fixed_margin_required" CHECK ("product_variants"."margin_mode" IS NULL OR "product_variants"."margin_mode" = 'pct' OR "product_variants"."margin_fixed_bs" IS NOT NULL);
