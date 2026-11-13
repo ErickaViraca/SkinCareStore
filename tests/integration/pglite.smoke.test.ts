@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { createTestDatabase } from "../helpers/pglite";
+import { createEmptyDatabase as createTestDatabase } from "../helpers/pglite";
 
 import type { PGlite } from "@electric-sql/pglite";
 

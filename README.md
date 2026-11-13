@@ -40,6 +40,9 @@ npm run dev                  # http://localhost:3000
 | `npm run typecheck` | Revisión de tipos (TypeScript) |
 | `npm run arch` | Reglas de capas y dependencias circulares (dependency-cruiser) |
 | `npm run unused` | Código, exports y dependencias sin usar (knip) |
+| `npm run db:generate` | Genera una migración a partir de cambios en `src/db/schema` |
+| `npm run db:check` | Verifica que las migraciones sean coherentes |
+| `npm run db:migrate` | Aplica las migraciones a la base de `DATABASE_URL` (desarrollo o producción) |
 | `npm run check` | Todo lo anterior salvo build y Postgres: **correr antes de abrir un PR** |
 
 ## Estructura
