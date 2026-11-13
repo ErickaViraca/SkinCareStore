@@ -349,6 +349,8 @@ ventas
 - **Ganancia acumulada sin repartir** = suma de las ganancias netas − lo ya repartido. Lo que no se reparte **se queda como reinversión** y sigue sumando mes a mes.
 - **Reparto** (cuando ustedes decidan; normalmente cada 3 meses o más): se elige cuánto repartir de lo acumulado. El sistema lo divide **según el porcentaje de cada socia** en ese momento y lo deja registrado.
 - **Retiro de ganancias:** cada socia puede retirar hasta lo que le tocó en los repartos menos lo que ya retiró. **No se puede retirar más.**
+- **Pérdidas de inventario:** vencidos, dañados, muestras y ajustes (incluidos los del cuadre), valuados al costo real del lote. Un ajuste positivo (el cuadre encontró unidades de más) reduce las pérdidas. Las devoluciones al proveedor no cuentan como pérdida.
+- **Centavos del reparto:** cada socia recibe la parte entera de su porcentaje y los centavos que sobran se asignan uno a uno a quienes tenían la mayor fracción (método del mayor resto). Así el reparto suma exactamente el monto y nadie recibe más de 1 centavo de diferencia con su parte exacta. Ejemplo: 1.000 Bs entre 2/3 y 1/3 → 666,67 y 333,33.
 
 ### 4.14 Gastos
 - Cada gasto se registra con su categoría, cuenta de origen y descripción.
@@ -518,3 +520,5 @@ Las credenciales de producción nunca están disponibles en los tests ni en GitH
 | 28 | Entornos separados: tests (temporal), desarrollo (rama de Neon) y producción |
 | 29 | Cálculos de costo y precio con precisión exacta (fracciones de centavo); se redondea una sola vez, al final |
 | 30 | El costo real por unidad de cada lote se guarda redondeado hacia arriba al centavo (nunca se subestima el costo) |
+| 31 | Pérdidas de inventario al costo real del lote; los ajustes positivos las reducen; las devoluciones al proveedor no son pérdida |
+| 32 | Reparto de ganancias en centavos exactos por el método del mayor resto |
