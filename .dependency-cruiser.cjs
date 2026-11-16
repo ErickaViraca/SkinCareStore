@@ -49,10 +49,18 @@ module.exports = {
     },
     {
       name: "solo-repositorios-acceden-a-db",
-      comment: "Solo los repositorios (y la propia carpeta db) importan src/db.",
+      comment:
+        "Solo los repositorios (y la propia carpeta db) usan el esquema y las consultas. Los servicios pueden usar únicamente src/db/client (la conexión, para abrir transacciones).",
       severity: "error",
-      from: { path: "^src/", pathNot: "^src/(server/repositories|db)" },
+      from: { path: "^src/", pathNot: "^src/(server/repositories|server/services|db)" },
       to: { path: "^src/db" },
+    },
+    {
+      name: "servicios-solo-usan-la-conexion",
+      comment: "Los servicios no tocan tablas ni migraciones: eso es trabajo de los repositorios.",
+      severity: "error",
+      from: { path: "^src/server/services" },
+      to: { path: "^src/db", pathNot: "^src/db/client" },
     },
     {
       name: "app-no-usa-servicios-ni-repositorios",

@@ -30,6 +30,15 @@ export const settings = pgTable(
     instagramUrl: text("instagram_url"),
     facebookUrl: text("facebook_url"),
     tiktokUrl: text("tiktok_url"),
+    // Identidad visual (§4.17): logo y colores editables desde Configuración.
+    logoUrl: text("logo_url"),
+    colorBackground: text("color_background").notNull().default("#FAF6E3"),
+    colorNav: text("color_nav").notNull().default("#0E2D06"),
+    colorPrimary: text("color_primary").notNull().default("#D6D22E"),
+    colorSecondary: text("color_secondary").notNull().default("#4A7A24"),
+    colorAccent: text("color_accent").notNull().default("#839A2D"),
+    colorDanger: text("color_danger").notNull().default("#C62828"),
+    colorText: text("color_text").notNull().default("#1C1C1A"),
     defaultMarginPct: numeric("default_margin_pct", { precision: 6, scale: 2 }).notNull().default("25"),
     defaultMinStock: integer("default_min_stock").notNull().default(2),
     expiryTiers: jsonb("expiry_tiers").$type<ExpiryTier[]>().notNull(),
@@ -39,6 +48,13 @@ export const settings = pgTable(
     check("settings_single_row", sql`${table.id} = 1`),
     check("settings_default_margin_non_negative", sql`${table.defaultMarginPct} >= 0`),
     check("settings_default_min_stock_non_negative", sql`${table.defaultMinStock} >= 0`),
+    check(
+      "settings_colors_are_hex",
+      sql`${table.colorBackground} ~ '^#[0-9A-Fa-f]{6}$' AND ${table.colorNav} ~ '^#[0-9A-Fa-f]{6}$'
+        AND ${table.colorPrimary} ~ '^#[0-9A-Fa-f]{6}$' AND ${table.colorSecondary} ~ '^#[0-9A-Fa-f]{6}$'
+        AND ${table.colorAccent} ~ '^#[0-9A-Fa-f]{6}$' AND ${table.colorDanger} ~ '^#[0-9A-Fa-f]{6}$'
+        AND ${table.colorText} ~ '^#[0-9A-Fa-f]{6}$'`,
+    ),
   ],
 );
 
