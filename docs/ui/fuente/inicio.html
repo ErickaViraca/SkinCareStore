@@ -1,0 +1,62 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="base.css"><title>Inicio</title>
+<style>
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:22px 0}
+.kpi .v{font-size:26px;font-weight:700;color:var(--dark);margin-top:6px;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12px;margin-top:4px}
+.kpi.hero{background:var(--dark);border-color:var(--dark)}
+.kpi.hero .label,.kpi.hero .s{color:#C9D49A}.kpi.hero .v{color:#fff}
+.grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+.alert{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #F0ECD9}
+.alert:last-child{border:0}
+.alert .bar{width:4px;align-self:stretch;border-radius:4px}
+.sale{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid #F0ECD9}.sale:last-child{border:0}
+.hello{font-family:"Playfair Display",serif;font-size:30px;color:var(--dark)}
+@media (max-width:760px){.kpis{grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}.kpi{padding:14px}.kpi .v{font-size:20px}.grid2{grid-template-columns:1fr}.hello{font-size:24px}.newsale{width:100%;justify-content:center}}
+</style></head><body>
+<div class="topbar"><div class="logo">Sole<span class="i">ı</span>l</div><div class="avatar">E</div></div>
+<div class="app">
+ <aside class="sidebar">
+  <div class="logo">Sole<span class="i">ı</span>l<small>Dermocosmética</small></div>
+  <nav class="nav">
+   <a class="active"><span class="ic"></span>Inicio</a><a><span class="ic"></span>Venta rápida</a><a><span class="ic"></span>Ventas</a>
+   <div class="sep"></div><a><span class="ic"></span>Productos</a><a><span class="ic"></span>Compras</a><a><span class="ic"></span>Inventario</a><a><span class="ic"></span>Por vencer y ofertas</a>
+   <div class="sep"></div><a><span class="ic"></span>Dinero</a><a><span class="ic"></span>Capital</a><a><span class="ic"></span>Gastos</a><a><span class="ic"></span>Reportes</a>
+   <div class="sep"></div><a><span class="ic"></span>Configuración</a>
+  </nav>
+  <div class="user"><div class="avatar">E</div><div>Ericka<br><span style="color:#A9B97A">Administradora</span></div></div>
+ </aside>
+ <main class="main">
+  <div class="row between" style="flex-wrap:wrap;gap:14px">
+   <div><div class="hello">Hola, Ericka</div><div class="muted">Lunes 16 de noviembre</div></div>
+   <a class="btn btn-primary btn-lg newsale">＋ Nueva venta</a>
+  </div>
+  <div class="kpis">
+   <div class="card kpi hero"><div class="label">Ventas de hoy</div><div class="v">Bs 1.430</div><div class="s">5 ventas · 3 QR · 2 efectivo</div></div>
+   <div class="card kpi"><div class="label">Ventas del mes</div><div class="v">Bs 18.760</div><div class="s muted">64 ventas</div></div>
+   <div class="card kpi"><div class="label">Ganancia del mes</div><div class="v">Bs 4.215</div><div class="s" style="color:var(--forest);font-weight:600">▲ 12% vs. octubre</div></div>
+   <div class="card kpi"><div class="label">Caja · Banco</div><div class="v">Bs 2.180</div><div class="s muted">Banco Bs 9.640</div></div>
+  </div>
+  <div class="grid2">
+   <div class="card">
+    <div class="row between"><h2>Para atender hoy</h2><span class="chip chip-low">4 avisos</span></div>
+    <div style="margin-top:8px">
+     <div class="alert"><span class="bar" style="background:var(--danger)"></span><div><b>Eucerin Pigment Control · Tono claro</b><div class="muted">Vence en 52 días · 3 unidades en oferta (−50% de la ganancia)</div></div></div>
+     <div class="alert"><span class="bar" style="background:var(--lime)"></span><div><b>ISDIN Fusion Water Magic · Tono medio</b><div class="muted">Stock bajo: quedan 2 (mínimo 2)</div></div></div>
+     <div class="alert"><span class="bar" style="background:var(--olive)"></span><div><b>CeraVe Blemish Control 236 ml</b><div class="muted">Precio subido solo a Bs 259,90 por nuevo costo · revisar</div></div></div>
+     <div class="alert"><span class="bar" style="background:var(--forest)"></span><div><b>Alquiler de dos armarios · Bs 400</b><div class="muted">Gasto de noviembre pendiente de confirmar</div></div></div>
+    </div>
+   </div>
+   <div class="card">
+    <div class="row between"><h2>Últimas ventas</h2><a class="muted" style="font-weight:600;color:var(--forest)">Ver todas</a></div>
+    <div style="margin-top:6px">
+     <div class="sale"><div><b>#0412</b> · ISDIN Active Unify con color<div class="muted">WhatsApp · QR · 11:42</div></div><div class="money">Bs 290</div></div>
+     <div class="sale"><div><b>#0411</b> · 2× Neutrogena Hydro Boost<div class="muted">Tienda · Efectivo · 10:15</div></div><div class="money">Bs 440</div></div>
+     <div class="sale"><div><b>#0410</b> · Cicaplast Baume B5 40 ml<div class="muted">Instagram · QR · 09:58</div></div><div class="money">Bs 190</div></div>
+     <div class="sale"><div><b>#0409</b> · Dr. Althea 345 Relief Cream<div class="muted">Tienda · Mixto · 09:20</div></div><div class="money">Bs 400</div></div>
+    </div>
+   </div>
+  </div>
+ </main>
+</div>
+<nav class="bottomnav"><a class="active"><span class="ic"></span>Inicio</a><a><span class="ic"></span>Vender</a><a><span class="ic"></span>Productos</a><a><span class="ic"></span>Más</a></nav>
+</body></html>
