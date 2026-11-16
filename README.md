@@ -3,6 +3,8 @@
 Panel privado para administrar la tienda de dermocosmética **Soleil**: productos, compras, ventas, stock, precios, ofertas por vencimiento, dinero, capital de las socias, gastos y reportes.
 
 - **Especificación:** [docs/ESPECIFICACION.md](docs/ESPECIFICACION.md)
+- **Guía visual (bocetos aprobados):** [docs/UI.md](docs/UI.md)
+- **Configuración de servicios (Neon, Google, R2):** [docs/CONFIGURACION-SERVICIOS.md](docs/CONFIGURACION-SERVICIOS.md)
 - **Guías de código (de lectura obligatoria antes de programar):**
   - [Backend](docs/guias/backend.md)
   - [Frontend](docs/guias/frontend.md)

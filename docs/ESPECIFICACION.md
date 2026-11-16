@@ -37,7 +37,7 @@ Sistema privado para administrar la tienda de dermocosmética **Soleil** (Cochab
 | Interfaz | Material UI (MUI), responsive, pensada para celular primero |
 | Base de datos | Postgres en Neon (proyecto nuevo, separado de Xiaomi), con Drizzle ORM |
 | Archivos | Cloudflare R2: bucket **público** para fotos y bucket **privado** para facturas de compra (enlaces temporales) |
-| Login | Google (Auth.js), solo los emails autorizados |
+| Login | Google (Auth.js). Después de Google, el email verificado se busca en `admin_users`: solo entran las cuentas activas (§4.16) |
 | Hosting | Vercel (proyecto nuevo) |
 | Dominio | `.com` comprado en Cloudflare, con "bolivia" en el nombre (por ejemplo `soleilbolivia.com`; disponibilidad a confirmar) |
 | Tests | Vitest (unitarios, integración, secuencias aleatorias con fast-check) sobre PGlite y Postgres en contenedor (ver sección 7) |
@@ -71,6 +71,7 @@ docs/         especificación y decisiones
 
 **settings** (una sola fila, editable desde el panel)
 - Datos de la tienda: nombre, teléfonos, direcciones, redes
+- **Identidad visual** (§4.17): `logo_url` y los colores `color_background`, `color_nav`, `color_primary`, `color_secondary`, `color_accent`, `color_danger`, `color_text`
 - `default_margin_pct` = 25
 - `default_min_stock` = 2
 - `expiry_tiers` — escalones de vencimiento (ver 4.8). Por defecto:
@@ -363,11 +364,38 @@ ventas
 - Gasto recurrente pendiente de confirmar.
 - Diferencia en el cierre de caja.
 
+### 4.16 Acceso al panel
+1. La usuaria toca **"Ingresar con Google"**.
+2. Google comprueba que es dueña de la cuenta y devuelve el email **verificado**.
+3. El sistema busca ese email en `admin_users`: si existe y está activo, entra; si no, ve "Esta cuenta no tiene acceso al panel".
+- La verificación va **después** de Google: un email escrito a mano no está comprobado, y revisarlo antes permitiría averiguar qué cuentas tienen acceso.
+- Las administradoras se agregan, desactivan y reactivan en **Configuración → Usuarias del panel**. Los emails no están en el código ni en variables de entorno.
+- **Primer ingreso:** con la tabla vacía, se cargan las primeras cuentas con un comando de una sola vez (`npm run admin:add -- email "Nombre"`).
+
+### 4.17 Identidad visual
+- El logo y los colores de la tienda se editan en **Configuración → Identidad de la tienda**. Todo el panel (y después la página pública) toma sus colores de ahí: si se cambian, cambia todo.
+- Colores iniciales y para qué se usa cada uno:
+
+| Color | Valor inicial | Uso | Texto encima |
+|---|---|---|---|
+| Fondo (`color_background`) | Crema suave `#FAF6E3` | Fondo de la aplicación | Negro |
+| Navegación (`color_nav`) | Verde oscuro `#0E2D06` | Menú, barras superior e inferior, títulos | Blanco (títulos: el propio verde sobre el fondo) |
+| Principal (`color_primary`) | Amarillo verdoso `#D6D22E` | Guardar, confirmar, acción principal, ítem activo del menú | Verde oscuro |
+| Secundario (`color_secondary`) | Verde bosque `#4A7A24` | Enlaces y botones secundarios (con borde) | — |
+| Acento (`color_accent`) | Oliva `#839A2D` | Detalles: avatar, íconos, marcas suaves | — |
+| Peligro (`color_danger`) | Rojo `#C62828` | Cancelar, archivar, anular, borrar (botones e íconos) | Blanco |
+| Texto (`color_text`) | Negro `#1C1C1A` | Texto sobre el fondo y las tarjetas | — |
+
+- **Los colores de las letras son fijos** (no cambian solos según el fondo): blanco sobre la navegación, verde oscuro sobre el color principal, negro sobre el fondo.
+- Al editar los colores, el panel **avisa** si una combinación no se lee bien (contraste menor a 4,5), sin impedir guardarla.
+- El rojo de peligro es provisorio; más adelante se elige un tono más armónico con la paleta.
+- Guía visual completa y bocetos: `docs/UI.md`.
+
 ---
 
 ## 5. Pantallas del panel
 
-1. **Login** con Google.
+1. **Login** con Google (§4.16).
 2. **Inicio:** ventas de hoy y del mes, ganancia del mes, saldos de Caja y Banco, alertas, botón grande "Nueva venta".
 3. **Venta rápida** (celular primero): buscar por nombre, código o tono; cantidad; precio normal u oferta aplicado solo; canal; **uno o varios medios de pago**.
 4. **Ventas:** lista con filtros, detalle, anular con motivo.
@@ -383,7 +411,7 @@ ventas
 14. **Gastos:** registro, categorías, gastos recurrentes y pendientes.
 15. **Reportes:** resultado mensual (ventas, ganancia bruta, gastos, pérdidas, ganancia neta, acumulado sin repartir); ventas por canal y por medio de pago; utilidad por producto; más vendidos. Exportar a Excel.
 16. **Importar Excel:** vista previa con errores → productos, variantes y compra "Inventario inicial".
-17. **Configuración:** datos de la tienda, margen, stock mínimo, escalones de vencimiento, cuentas.
+17. **Configuración:** datos de la tienda, **identidad visual (logo y colores, §4.17)**, **usuarias del panel (§4.16)**, margen, stock mínimo, escalones de vencimiento, cuentas.
 
 ---
 
@@ -483,6 +511,7 @@ Las credenciales de producción nunca están disponibles en los tests ni en GitH
 - **Agente de WhatsApp** que consulta las vistas públicas.
 - **Facturación electrónica.**
 - **Página pública** (repositorio aparte).
+- **Inicio personalizable:** que cada usuaria reordene las tarjetas del inicio (accesos rápidos, indicadores) arrastrándolas, y que el orden se guarde.
 
 ---
 
@@ -522,3 +551,8 @@ Las credenciales de producción nunca están disponibles en los tests ni en GitH
 | 30 | El costo real por unidad de cada lote se guarda redondeado hacia arriba al centavo (nunca se subestima el costo) |
 | 31 | Pérdidas de inventario al costo real del lote; los ajustes positivos las reducen; las devoluciones al proveedor no son pérdida |
 | 32 | Reparto de ganancias en centavos exactos por el método del mayor resto |
+| 33 | Acceso al panel: Google primero y después verificación del email en `admin_users` (activo); administradoras gestionadas desde Configuración |
+| 34 | Logo y colores de la tienda editables desde Configuración; el tema se arma con esos valores |
+| 35 | Paleta inicial y roles de color (§4.17); colores de texto fijos; aviso de contraste sin bloquear |
+| 36 | Bocetos aprobados del inicio, lista de productos y ficha de producto (docs/UI.md) |
+| 37 | Reordenar las tarjetas del inicio arrastrándolas queda para más adelante |
