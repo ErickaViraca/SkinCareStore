@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:vercel": "tsx scripts/migrate-on-deploy.ts && next build",
     "start": "next start",
     "db:generate": "drizzle-kit generate",
     "db:check": "drizzle-kit check",
