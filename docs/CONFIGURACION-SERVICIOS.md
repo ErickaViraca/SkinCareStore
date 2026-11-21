@@ -29,14 +29,21 @@ Los nombres van en español (como aparecen con la consola en español) y, entre 
    2. **Público** (*Audience*): **Usuarios externos** (*External*).
    3. **Información de contacto** (*Contact information*): tu email.
    4. **Finalizar**: aceptar la política de datos del usuario → **Crear**.
-3. **Publicar la app:** en el menú de la izquierda, **Público** (*Audience*) → **Publicar app** (*Publish app*) → confirmar. El estado pasa de **Prueba** (*Testing*) a **En producción** (*In production*).
-   - Como solo pedimos nombre y email, Google no exige verificación.
-   - Alternativa: dejarla en **Prueba** y agregar los emails de las socias en **Público → Usuarios de prueba**. En Prueba solo pueden entrar esos usuarios; la sesión del panel dura lo mismo (12 horas).
+3. **Usuarios de prueba:** la app queda en estado **Prueba** (*Testing*). En **Público → Usuarios de prueba** (*Audience → Test users*) → **Agregar usuarios**: el email de Google de cada socia.
+   - En Prueba solo pueden pasar por el ingreso con Google esos emails (hasta 100). Google puede mostrar un aviso de "app no verificada" o "en prueba"; se acepta y sigue.
+   - La sesión del panel dura lo mismo (12 horas) en Prueba o en producción.
+   - **Publicar la app** (pasar a *En producción*) exige una URL de página principal y una de política de privacidad. Se hace en la etapa 8, cuando exista el dominio (ver más abajo).
 4. **Clientes → Crear cliente** (*Clients → Create client*):
    - Tipo: **Aplicación web** (*Web application*). Nombre: `Soleil panel`.
    - **Orígenes autorizados de JavaScript** (*Authorized JavaScript origins*): `http://localhost:3000` (más adelante se agrega el dominio del panel).
    - **URI de redireccionamiento autorizados** (*Authorized redirect URIs*): `http://localhost:3000/api/auth/callback/google` (más adelante, `https://<dominio-del-panel>/api/auth/callback/google`).
 5. Copia y guarda el **ID de cliente** (*Client ID*) y el **Secreto del cliente** (*Client secret*) en tu gestor de contraseñas.
+
+**Etapa 8 (dominio y producción), pendiente en Google:**
+1. Publicar una página de **política de privacidad** (qué datos guardamos de las administradoras: nombre y email, y para qué).
+2. En **Información de la marca**: página principal, política de privacidad y el dominio en **Dominios autorizados**. No subir logo (obliga a verificar la marca).
+3. En **Clientes**: agregar `https://<dominio-del-panel>` como origen y `https://<dominio-del-panel>/api/auth/callback/google` como URI de redireccionamiento.
+4. En **Público**: **Publicar app**.
 
 > Recuerda: quién puede entrar **no** se configura en Google. Se controla en la tabla `admin_users` (especificación §4.16).
 
