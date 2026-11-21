@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DEFAULT_BRANDING } from "@/lib/branding";
 import { auth } from "@/server/auth/auth";
-import { loadBranding, requireAdmin } from "@/server/controllers/session.controller";
+import { loadBranding, requireAdmin, requireAdminSession } from "@/server/controllers/session.controller";
+import { UnauthorizedError } from "@/server/errors/app-error";
 import { findActiveAdmin } from "@/server/services/access.service";
 import { getBranding } from "@/server/services/branding.service";
 
@@ -49,5 +50,19 @@ describe("controlador de sesión", () => {
   it("lee la identidad visual en cada pedido", async () => {
     vi.mocked(getBranding).mockResolvedValue(DEFAULT_BRANDING);
     await expect(loadBranding()).resolves.toEqual(DEFAULT_BRANDING);
+  });
+
+  describe("requireAdminSession (para las acciones)", () => {
+    it("devuelve la administradora activa", async () => {
+      mockedAuth.mockResolvedValue({ user: { id: ADMIN.id } });
+      vi.mocked(findActiveAdmin).mockResolvedValue(ADMIN);
+      await expect(requireAdminSession()).resolves.toEqual(ADMIN);
+    });
+
+    it("sin sesión válida lanza UnauthorizedError en vez de redirigir", async () => {
+      mockedAuth.mockResolvedValue(null);
+      vi.mocked(findActiveAdmin).mockResolvedValue(null);
+      await expect(requireAdminSession()).rejects.toBeInstanceOf(UnauthorizedError);
+    });
   });
 });

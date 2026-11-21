@@ -1,5 +1,6 @@
 import AccountBalanceWalletOutlined from "@mui/icons-material/AccountBalanceWalletOutlined";
 import AssessmentOutlined from "@mui/icons-material/AssessmentOutlined";
+import CategoryOutlined from "@mui/icons-material/CategoryOutlined";
 import EventBusyOutlined from "@mui/icons-material/EventBusyOutlined";
 import HomeOutlined from "@mui/icons-material/HomeOutlined";
 import Inventory2Outlined from "@mui/icons-material/Inventory2Outlined";
@@ -34,6 +35,7 @@ export const NAV_GROUPS: readonly (readonly NavItem[])[] = [
   ],
   [
     { href: "/productos", label: "Productos", icon: SpaOutlined, available: false },
+    { href: "/catalogo", label: "Marcas y categorías", icon: CategoryOutlined, available: true },
     { href: "/compras", label: "Compras", icon: ShoppingCartOutlined, available: false },
     { href: "/inventario", label: "Inventario", icon: WarehouseOutlined, available: false },
     { href: "/por-vencer", label: "Por vencer y ofertas", icon: EventBusyOutlined, available: false },

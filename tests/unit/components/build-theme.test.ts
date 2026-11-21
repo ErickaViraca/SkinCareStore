@@ -28,4 +28,8 @@ describe("buildTheme", () => {
   it("cambia de celular a computadora en 760 px", () => {
     expect(buildTheme(DEFAULT_PALETTE).breakpoints.values.md).toBe(760);
   });
+
+  it("los campos de texto usan el verde bosque (el principal no se lee sobre blanco)", () => {
+    expect(buildTheme(DEFAULT_PALETTE).components?.MuiTextField?.defaultProps?.color).toBe("secondary");
+  });
 });

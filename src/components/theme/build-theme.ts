@@ -30,6 +30,8 @@ export function buildTheme(palette: BrandPalette): Theme {
       primary: { main: palette.primary, contrastText: palette.nav },
       secondary: { main: palette.secondary, contrastText: ON_COLOR.nav },
       error: { main: palette.danger, contrastText: ON_COLOR.danger },
+      // Avisos de "guardado": el verde bosque de la paleta en vez del verde de MUI.
+      success: { main: palette.secondary, contrastText: ON_COLOR.nav },
       divider: NEUTRALS.border,
       nav: { main: palette.nav, contrastText: ON_COLOR.nav },
       accent: { main: palette.accent, contrastText: ON_COLOR.nav },
@@ -50,6 +52,9 @@ export function buildTheme(palette: BrandPalette): Theme {
         defaultProps: { disableElevation: true },
         styleOverrides: { root: { borderRadius: 999, paddingInline: 18 } },
       },
+      MuiDialogTitle: {
+        styleOverrides: { root: { fontFamily: DISPLAY_FONT, fontWeight: 700, color: palette.nav } },
+      },
       MuiCard: {
         defaultProps: { variant: "outlined" },
         styleOverrides: {
@@ -60,6 +65,8 @@ export function buildTheme(palette: BrandPalette): Theme {
           },
         },
       },
+      // El amarillo verdoso no se lee bien como borde y etiqueta sobre blanco: los campos usan el verde bosque.
+      MuiTextField: { defaultProps: { color: "secondary" } },
       MuiOutlinedInput: {
         styleOverrides: {
           root: { borderRadius: 12 },
