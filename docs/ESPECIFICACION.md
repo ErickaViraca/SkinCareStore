@@ -87,6 +87,9 @@ docs/         especificación y decisiones
 **brands** — `id, name (único), slug, logo_url, archived_at`
 
 **categories** — `id, name (único), slug, parent_id, archived_at`
+- Un solo nivel de subcategorías ("Rostro → Sérums"). Una categoría con subcategorías activas no se archiva; una subcategoría no se reactiva si su padre está archivado.
+- Marcas y categorías no se borran: se archivan. Archivadas, no se ofrecen al crear productos ni se ven en la página pública; sus productos se conservan.
+- El `slug` se genera solo a partir del nombre (sin tildes ni mayúsculas); dos nombres que dan el mismo slug se consideran repetidos.
 
 **products** (lo común a todas sus variantes)
 - `id, name, slug, brand_id, category_id, description, usage_instructions`
@@ -556,3 +559,4 @@ Las credenciales de producción nunca están disponibles en los tests ni en GitH
 | 35 | Paleta inicial y roles de color (§4.17); colores de texto fijos; aviso de contraste sin bloquear |
 | 36 | Bocetos aprobados del inicio, lista de productos y ficha de producto (docs/UI.md) |
 | 37 | Reordenar las tarjetas del inicio arrastrándolas queda para más adelante |
+| 38 | Categorías con un solo nivel de subcategorías; marcas y categorías se archivan, nunca se borran (§3.2) |

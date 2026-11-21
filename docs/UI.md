@@ -59,7 +59,7 @@ Bocetos **aprobados**. Sus fuentes HTML están en `docs/ui/fuente/` por si hay q
 
 Grupos del menú lateral (separados por una línea):
 1. Inicio · Venta rápida · Ventas
-2. Productos · Compras · Inventario · Por vencer y ofertas
+2. Productos · Marcas y categorías · Compras · Inventario · Por vencer y ofertas
 3. Dinero · Capital · Gastos · Reportes
 4. Configuración
 
