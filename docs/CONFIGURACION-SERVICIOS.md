@@ -22,17 +22,21 @@ Pasos para crear los servicios que usa el panel. Son las mismas cuentas que el p
 ## 2. Google Cloud (login con Google)
 
 1. Entra a [console.cloud.google.com](https://console.cloud.google.com). Puedes usar el mismo proyecto de Xiaomi o crear uno nuevo, por ejemplo "Soleil".
-2. **Google Auth Platform → Branding** (pantalla de consentimiento):
-   - Nombre de la app: **Soleil Gestión**.
-   - Email de soporte y de contacto: el tuyo.
-3. **Audience:** tipo **External**, y **Publish app** (pasar a *In production*).
-   - Si queda en *Testing*, solo entran usuarios de prueba y la sesión vence cada 7 días.
+Los nombres van en español (como aparecen con la consola en español) y, entre paréntesis, en inglés.
+
+2. **Google Auth Platform → Descripción general → Comenzar** (*Get started*). Es un asistente de 4 pasos:
+   1. **Información de la app** (*App information*): nombre **Soleil Gestión** y tu email de soporte.
+   2. **Público** (*Audience*): **Usuarios externos** (*External*).
+   3. **Información de contacto** (*Contact information*): tu email.
+   4. **Finalizar**: aceptar la política de datos del usuario → **Crear**.
+3. **Publicar la app:** en el menú de la izquierda, **Público** (*Audience*) → **Publicar app** (*Publish app*) → confirmar. El estado pasa de **Prueba** (*Testing*) a **En producción** (*In production*).
    - Como solo pedimos nombre y email, Google no exige verificación.
-4. **Clients → Create client:**
-   - Tipo: **Web application**. Nombre: `Soleil panel`.
-   - **Authorized JavaScript origins:** `http://localhost:3000` (más adelante se agrega el dominio del panel).
-   - **Authorized redirect URIs:** `http://localhost:3000/api/auth/callback/google` (más adelante, `https://<dominio-del-panel>/api/auth/callback/google`).
-5. Copia y guarda el **Client ID** y el **Client secret**.
+   - Alternativa: dejarla en **Prueba** y agregar los emails de las socias en **Público → Usuarios de prueba**. En Prueba solo pueden entrar esos usuarios; la sesión del panel dura lo mismo (12 horas).
+4. **Clientes → Crear cliente** (*Clients → Create client*):
+   - Tipo: **Aplicación web** (*Web application*). Nombre: `Soleil panel`.
+   - **Orígenes autorizados de JavaScript** (*Authorized JavaScript origins*): `http://localhost:3000` (más adelante se agrega el dominio del panel).
+   - **URI de redireccionamiento autorizados** (*Authorized redirect URIs*): `http://localhost:3000/api/auth/callback/google` (más adelante, `https://<dominio-del-panel>/api/auth/callback/google`).
+5. Copia y guarda el **ID de cliente** (*Client ID*) y el **Secreto del cliente** (*Client secret*) en tu gestor de contraseñas.
 
 > Recuerda: quién puede entrar **no** se configura en Google. Se controla en la tabla `admin_users` (especificación §4.16).
 
