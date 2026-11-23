@@ -1,10 +1,12 @@
 import { Suspense } from "react";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { EnvironmentBanner } from "@/components/layout/environment-banner";
 import { BrandThemeProvider } from "@/components/theme/brand-theme-provider";
 import { FullPageLoader } from "@/components/ui/full-page-loader";
 import { DEFAULT_PALETTE } from "@/lib/branding";
 import { signOutOfPanel } from "@/server/controllers/auth.actions";
+import { loadEnvironmentLabel } from "@/server/controllers/environment.controller";
 import { loadBranding, requireAdmin } from "@/server/controllers/session.controller";
 
 /**
@@ -31,6 +33,7 @@ async function PanelFrame({ children }: { readonly children: React.ReactNode }):
   const [admin, branding] = await Promise.all([requireAdmin(), loadBranding()]);
   return (
     <BrandThemeProvider palette={branding.palette}>
+      <EnvironmentBanner label={loadEnvironmentLabel()} />
       <AppShell
         storeName={branding.storeName}
         logoUrl={branding.logoUrl}

@@ -113,7 +113,45 @@ INSERT INTO admin_users (email, name) VALUES
 - Cada merge a `main` despliega solo (si falla la migración o el build, el panel anterior sigue en línea).
 - Cada PR recibe una **vista previa** con su propia dirección. Ahí todavía no se puede ingresar: Google solo acepta direcciones fijas. Se resolverá más adelante si hace falta.
 
-## 5. Qué se carga en cada lugar
+## 5. Ambiente de pruebas (rama `develop`)
+
+Un segundo panel, igual al oficial, con **su propia base y sus propias fotos**, para probar sin tocar los datos de la tienda. Se publica solo con cada merge a `develop`. Arriba muestra una franja amarilla **"Ambiente de pruebas"**.
+
+**A. Neon (rama `desarrollo`)**
+1. En Neon, proyecto `soleil` → **Connect** → **Branch: `desarrollo`**, **Role: `soleil_owner`**, **Connection pooling desactivado** → copiar la cadena (host **sin** `-pooler`). Es `DATABASE_URL_MIGRATIONS` de pruebas.
+2. Después del primer despliegue de `develop` (que crea las tablas y los usuarios en esta rama), en **SQL Editor** con la rama **`desarrollo`** elegida arriba:
+   ```sql
+   -- Contraseña DISTINTA a la de producción (32 caracteres, letras y números).
+   ALTER ROLE soleil_app WITH LOGIN PASSWORD 'LA_CONTRASEÑA_DE_PRUEBAS';
+
+   INSERT INTO admin_users (email, name) VALUES
+     ('tu-email@gmail.com', 'Ericka'),
+     ('email-de-vanessa@gmail.com', 'Vanessa')
+   ON CONFLICT (email) DO NOTHING;
+   ```
+3. **Connect** otra vez, rama `desarrollo`, **con** pooling (host con `-pooler`): reemplazar `soleil_owner:...@` por `soleil_app:LA_CONTRASEÑA_DE_PRUEBAS@`. Es `DATABASE_URL` de pruebas.
+
+**B. R2:** bucket nuevo `soleil-fotos-pruebas` con **acceso público (r2.dev)** y el mismo CORS que `soleil-fotos`, pero con `https://soleil-admin-pruebas.vercel.app` en `AllowedOrigins`. En el token de R2, agregar este bucket.
+
+**C. Vercel:** en **Settings → Environment Variables**, cada variable con **Environments: Preview** y **"Select a Custom Preview Branch" → `develop`**:
+
+| Variable | Valor |
+|---|---|
+| `DATABASE_URL_MIGRATIONS` | A.1 |
+| `DATABASE_URL` | A.3 |
+| `AUTH_SECRET` | Otra clave al azar (distinta a la de producción) |
+| `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Los mismos de producción |
+| `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | Los mismos (el token ya incluye el bucket nuevo) |
+| `R2_PHOTOS_BUCKET` | `soleil-fotos-pruebas` |
+| `R2_PUBLIC_URL` | La URL r2.dev de `soleil-fotos-pruebas` |
+
+Y en **Settings → Domains**: `soleil-admin-pruebas.vercel.app` asignado a la rama **`develop`**.
+
+**D. Google:** en el cliente, agregar el origen `https://soleil-admin-pruebas.vercel.app` y la URI `https://soleil-admin-pruebas.vercel.app/api/auth/callback/google`.
+
+**Copiar datos:** para ensayar con datos reales, en Neon se puede reiniciar la rama `desarrollo` desde `production` (**Branches → desarrollo → Reset from parent**). Borra lo que había en pruebas. Nunca al revés cuando haya ventas reales.
+
+## 6. Qué se carga en cada lugar
 
 | Variable | Desarrollo (`.env.local`) | Producción (Vercel) |
 |---|---|---|

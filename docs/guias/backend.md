@@ -107,7 +107,7 @@ En este proyecto, **repositorio** cumple el rol de **DAO** (*Data Access Object*
 5. **Solo con Drizzle o SQL parametrizado.** Nunca se arman consultas concatenando texto con datos (riesgo de inyección SQL).
 6. **Seleccionar solo las columnas necesarias.** Nada de `SELECT *` hacia capas superiores.
 7. **Errores de base de datos:** se capturan, se registran **una vez** en el log con el contexto (tabla, operación, sin datos sensibles) y se relanzan como `DatabaseError` marcado como registrado. Las violaciones conocidas se traducen al error de negocio que corresponda (por ejemplo, SKU repetido → `ConflictError`).
-8. **El acceso a `process.env` y a las credenciales vive solo en `src/db` y `src/server/storage`** (archivos en Cloudflare R2). Es la recomendación de Next.js: solo la capa de acceso a datos lee secretos.
+8. **El acceso a `process.env` y a las credenciales vive solo en `src/db`, `src/server/storage`** (archivos en Cloudflare R2) **y `src/server/config`** (ambiente). Es la recomendación de Next.js: solo la capa de acceso a datos lee secretos.
 
 ---
 
