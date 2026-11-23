@@ -9,11 +9,11 @@ import { BusinessRuleError, NotFoundError, ValidationError } from "@/server/erro
 import { createLogger } from "@/server/logger/logger";
 import { findBrandById } from "@/server/repositories/brands.repository";
 import { findCategoryById } from "@/server/repositories/categories.repository";
+import { type ProductImageRow, listProductImages } from "@/server/repositories/product-images.repository";
 import {
   type ProductListRow,
   type ProductRow,
   type ProductValues,
-  countProductImages,
   findProductById,
   insertProduct,
   isProductSlugTaken,
@@ -47,7 +47,7 @@ const MAX_NUMBERED_ATTEMPTS = 50;
 export interface ProductDetail {
   readonly product: ProductRow;
   readonly variants: readonly VariantDetailRow[];
-  readonly imageCount: number;
+  readonly images: readonly ProductImageRow[];
 }
 
 const productNotFound = (): NotFoundError => new NotFoundError("El producto no existe.");
@@ -60,8 +60,8 @@ export function listProducts(db: Database = getDb()): Promise<ProductListRow[]> 
 export async function getProductDetail(id: string, db: Database = getDb()): Promise<ProductDetail> {
   const product = await findProductById(db, id);
   if (!product) throw productNotFound();
-  const [variants, imageCount] = await Promise.all([listVariantsWithStock(db, id), countProductImages(db, id)]);
-  return { product, variants, imageCount };
+  const [variants, images] = await Promise.all([listVariantsWithStock(db, id), listProductImages(db, id)]);
+  return { product, variants, images };
 }
 
 /** Crea un producto junto con su primera variante (opción A aprobada), todo o nada. */

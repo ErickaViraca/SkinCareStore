@@ -8,6 +8,7 @@ import { NotFoundError } from "@/server/errors/app-error";
 import { toProductDetailDto, toProductListItemDto } from "@/server/mappers/products.mapper";
 import { listBrands } from "@/server/services/brands.service";
 import { listCategories } from "@/server/services/categories.service";
+import { arePhotosEnabled } from "@/server/services/photos.service";
 import { getProductDetail, listProducts } from "@/server/services/products.service";
 
 import { requireAdmin } from "./session.controller";
@@ -50,4 +51,10 @@ export async function loadProductFormOptions(): Promise<{ brands: OptionDto[]; c
       }))
       .sort(byLabel),
   };
+}
+
+/** ¿Se pueden subir fotos? (faltan las variables de R2 → la sección lo avisa). */
+export async function loadPhotosEnabled(): Promise<boolean> {
+  await requireAdmin();
+  return arePhotosEnabled();
 }

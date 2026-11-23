@@ -53,8 +53,14 @@ describe("mappers de productos", () => {
       variantCount: 0,
       priceFromBs: null,
       variantSearchText: "",
+      thumbnailUrl: null,
     };
-    expect(toProductListItemDto(row)).toMatchObject({ archived: true, priceFromCents: null, searchText: "" });
+    expect(toProductListItemDto(row)).toMatchObject({
+      archived: true,
+      priceFromCents: null,
+      searchText: "",
+      thumbnailUrl: null,
+    });
     expect(toProductListItemDto({ ...row, priceFromBs: "120.00" }).priceFromCents).toBe(12000);
   });
 });

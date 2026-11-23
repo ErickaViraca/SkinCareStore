@@ -251,7 +251,7 @@ const NUMBER = { fontVariantNumeric: "tabular-nums" } as const;
 const CARD = {
   border: 1,
   borderColor: "divider",
-  borderRadius: 3,
+  borderRadius: "14px",
   p: 1.5,
   display: "flex",
   alignItems: "center",

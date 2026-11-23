@@ -16,12 +16,18 @@ import { type Mutation } from "@/lib/action-state";
 import { productInputFromForm } from "./form-data";
 import { type Option, type ProductInitial, ProductFields } from "./product-fields";
 import { ProductStatus } from "./product-status";
-import { type VariantActions, type VariantItem, VariantsSection } from "./variants-section";
+import { type PhotoActions, PhotosSection } from "./photos-section";
+import { type VariantActions, type VariantItem, VariantsSection, variantLabel } from "./variants-section";
 
 interface ProductItem extends ProductInitial {
   readonly id: string;
   readonly archived: boolean;
-  readonly imageCount: number;
+  readonly photos: readonly {
+    readonly id: string;
+    readonly url: string;
+    readonly alt: string | null;
+    readonly variantId: string | null;
+  }[];
   readonly variants: readonly VariantItem[];
 }
 
@@ -37,6 +43,8 @@ interface ProductEditorProps {
   readonly categories: readonly Option[];
   readonly productActions: ProductActions;
   readonly variantActions: VariantActions;
+  readonly photoActions: PhotoActions;
+  readonly photosEnabled: boolean;
 }
 
 /** Ficha de producto (boceto aprobado): datos comunes arriba, variantes abajo. */
@@ -44,7 +52,6 @@ export function ProductEditor(props: ProductEditorProps): React.JSX.Element {
   const { product } = props;
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [confirmArchive, setConfirmArchive] = useState(false);
-  const [, startTransition] = useTransition();
   const notify = (text: string, severity: ToastMessage["severity"] = "success"): void => setToast({ text, severity });
 
   const [attempt, submit, pending] = useFormAttempt(
@@ -52,17 +59,10 @@ export function ProductEditor(props: ProductEditorProps): React.JSX.Element {
     () => notify("Producto guardado."),
   );
 
-  const restore = (): void =>
-    startTransition(async () => {
-      const result = await props.productActions.restore(product.id);
-      if (result.ok) notify("Producto reactivado.");
-      else notify(result.error.message, "error");
-    });
-
   return (
     <Stack spacing={2.5} sx={{ pb: { xs: 10, md: 0 } }}>
       <ProductStatus published={product.published} comingSoon={product.comingSoon} archived={product.archived} />
-      {product.archived && <ArchivedBanner onRestore={restore} />}
+      {product.archived && <ArchivedBanner restore={() => props.productActions.restore(product.id)} notify={notify} />}
       <form action={submit} noValidate>
         <FormCard
           title="Datos del producto"
@@ -73,11 +73,21 @@ export function ProductEditor(props: ProductEditorProps): React.JSX.Element {
             initial={product}
             brands={props.brands}
             categories={props.categories}
-            imageCount={product.imageCount}
+            imageCount={product.photos.length}
           />
         </FormCard>
         <ProductFormButtons archived={product.archived} pending={pending} onArchive={() => setConfirmArchive(true)} />
       </form>
+
+      <PhotosSection
+        productId={product.id}
+        photos={product.photos}
+        variants={activeVariantOptions(product.variants)}
+        enabled={props.photosEnabled}
+        archived={product.archived}
+        actions={props.photoActions}
+        notify={notify}
+      />
 
       <VariantsSection
         productId={product.id}
@@ -87,18 +97,17 @@ export function ProductEditor(props: ProductEditorProps): React.JSX.Element {
         notify={notify}
       />
 
-      <ConfirmDialog
-        open={confirmArchive}
-        title={`¿Archivar ${product.name}?`}
-        message={ARCHIVE_MESSAGE}
-        confirmLabel="Archivar"
-        onConfirm={() => props.productActions.archive(product.id)}
-        onSuccess={() => {
-          setConfirmArchive(false);
-          notify("Producto archivado.");
-        }}
-        onClose={() => setConfirmArchive(false)}
-      />
+      {confirmArchive && (
+        <ArchiveProductDialog
+          name={product.name}
+          onConfirm={() => props.productActions.archive(product.id)}
+          onDone={() => {
+            setConfirmArchive(false);
+            notify("Producto archivado.");
+          }}
+          onClose={() => setConfirmArchive(false)}
+        />
+      )}
       <Toast message={toast} onClose={() => setToast(null)} />
     </Stack>
   );
@@ -107,9 +116,29 @@ export function ProductEditor(props: ProductEditorProps): React.JSX.Element {
 const ARCHIVE_MESSAGE =
   "Deja de ofrecerse en la venta y en la página pública. Sus datos, ventas y stock se conservan. Puedes reactivarlo cuando quieras.";
 
-function ArchivedBanner({ onRestore }: { readonly onRestore: () => void }): React.JSX.Element {
+interface ArchivedBannerProps {
+  readonly restore: () => ReturnType<Mutation>;
+  readonly notify: (text: string, severity?: ToastMessage["severity"]) => void;
+}
+
+/** Aviso de producto archivado, con el botón para reactivarlo. */
+function ArchivedBanner({ restore, notify }: ArchivedBannerProps): React.JSX.Element {
+  const [pending, startTransition] = useTransition();
+  const onRestore = (): void =>
+    startTransition(async () => {
+      const result = await restore();
+      if (result.ok) notify("Producto reactivado.");
+      else notify(result.error.message, "error");
+    });
   return (
-    <Alert severity="info" action={<Button onClick={onRestore}>Reactivar</Button>}>
+    <Alert
+      severity="info"
+      action={
+        <Button onClick={onRestore} disabled={pending}>
+          Reactivar
+        </Button>
+      }
+    >
       Este producto está archivado: no se ofrece en la venta ni en la página pública.
     </Alert>
   );
@@ -137,5 +166,33 @@ function ProductFormButtons({ archived, pending, onArchive }: ProductFormButtons
         {pending ? "Guardando…" : "Guardar"}
       </Button>
     </FormActions>
+  );
+}
+
+/** Variantes activas como opciones del selector "Para" de cada foto. */
+function activeVariantOptions(variants: readonly VariantItem[]): { id: string; label: string }[] {
+  return variants
+    .filter((variant) => !variant.archived)
+    .map((variant) => ({ id: variant.id, label: variantLabel(variant) }));
+}
+
+interface ArchiveProductDialogProps {
+  readonly name: string;
+  readonly onConfirm: () => ReturnType<Mutation>;
+  readonly onDone: () => void;
+  readonly onClose: () => void;
+}
+
+function ArchiveProductDialog({ name, onConfirm, onDone, onClose }: ArchiveProductDialogProps): React.JSX.Element {
+  return (
+    <ConfirmDialog
+      open
+      title={`¿Archivar ${name}?`}
+      message={ARCHIVE_MESSAGE}
+      confirmLabel="Archivar"
+      onConfirm={onConfirm}
+      onSuccess={onDone}
+      onClose={onClose}
+    />
   );
 }

@@ -120,6 +120,9 @@ export const productImages = pgTable(
       .references(() => products.id),
     variantId: uuid("variant_id").references(() => productVariants.id),
     url: text("url").notNull(),
+    // Ruta del archivo en R2 ("products/<id>/<uuid>.webp"). Sirve para borrarlo y
+    // para rehacer la URL si cambia el dominio de las fotos (etapa 8).
+    storageKey: text("storage_key"),
     alt: text("alt"),
     sortOrder: integer("sort_order").notNull().default(0),
     createdAt: createdAt(),

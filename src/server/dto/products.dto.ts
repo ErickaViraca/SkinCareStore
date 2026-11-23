@@ -144,6 +144,15 @@ export interface ProductListItemDto {
   readonly variantCount: number;
   readonly priceFromCents: number | null;
   readonly searchText: string;
+  readonly thumbnailUrl: string | null;
+}
+
+/** Una foto del producto. `variantId` = foto de un tono; `null` = de todo el producto. */
+interface PhotoDto {
+  readonly id: string;
+  readonly url: string;
+  readonly alt: string | null;
+  readonly variantId: string | null;
 }
 
 /** Una variante en la ficha del producto. Montos en centavos. */
@@ -179,7 +188,7 @@ export interface ProductDetailDto {
   readonly featured: boolean;
   readonly comingSoon: boolean;
   readonly archived: boolean;
-  readonly imageCount: number;
+  readonly photos: readonly PhotoDto[];
   readonly variants: readonly VariantDto[];
 }
 
@@ -188,3 +197,17 @@ export interface OptionDto {
   readonly id: string;
   readonly label: string;
 }
+
+const photoTypeSchema = z.enum(["image/webp", "image/jpeg", "image/png"], {
+  error: "Solo se aceptan fotos JPG, PNG o WebP.",
+});
+export const prepareUploadSchema = z.object({ productId: idSchema, contentType: photoTypeSchema });
+export const registerUploadSchema = z.object({ productId: idSchema, key: z.string().max(200) });
+export const movePhotoSchema = z.object({ id: idSchema, direction: z.enum(["earlier", "later"]) });
+export const assignPhotoSchema = z.object({
+  id: idSchema,
+  variantId: z
+    .union([idSchema, z.literal("")])
+    .nullish()
+    .transform((value) => value || null),
+});

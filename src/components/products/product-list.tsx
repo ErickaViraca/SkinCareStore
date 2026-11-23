@@ -25,6 +25,7 @@ import { type Cents, formatBs } from "@/domain/money";
 
 import { type ProductStatusFilter, filterProducts } from "./product-filters";
 import { ProductStatus } from "./product-status";
+import { ProductThumb } from "./product-thumb";
 
 /** Lo que la lista muestra de cada producto (coincide con el DTO del servidor). */
 interface ProductItem {
@@ -39,6 +40,7 @@ interface ProductItem {
   readonly variantCount: number;
   readonly priceFromCents: number | null;
   readonly searchText: string;
+  readonly thumbnailUrl: string | null;
 }
 
 interface CategoryOption {
@@ -175,6 +177,7 @@ function DesktopTable({ products }: { readonly products: readonly ProductItem[] 
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell sx={{ width: 72 }}>Foto</TableCell>
             <TableCell>Producto</TableCell>
             <TableCell>Categoría</TableCell>
             <TableCell>Variantes</TableCell>
@@ -190,6 +193,9 @@ function DesktopTable({ products }: { readonly products: readonly ProductItem[] 
               onClick={() => router.push(`/productos/${product.id}`)}
               sx={{ cursor: "pointer" }}
             >
+              <TableCell>
+                <ProductThumb url={product.thumbnailUrl} alt={product.name} />
+              </TableCell>
               <TableCell>
                 <Typography variant="overline" component="div" sx={{ lineHeight: 1.4 }}>
                   {product.brandName}
@@ -219,15 +225,22 @@ function MobileCards({ products }: { readonly products: readonly ProductItem[] }
     <Stack spacing={1.5} useFlexGap sx={{ display: { md: "none" } }}>
       {products.map((product) => (
         <Card key={product.id}>
-          <CardActionArea component={Link} href={`/productos/${product.id}`} sx={{ px: 2, py: 1.5 }}>
-            <Typography variant="overline" component="div" sx={{ lineHeight: 1.4 }}>
-              {product.brandName}
-            </Typography>
-            <Typography sx={{ fontWeight: 600 }}>{product.name}</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              {variantsLabel(product.variantCount)} · {priceFrom(product)}
-            </Typography>
-            <ProductStatus {...product} />
+          <CardActionArea
+            component={Link}
+            href={`/productos/${product.id}`}
+            sx={{ px: 2, py: 1.5, display: "flex", gap: 1.5, alignItems: "flex-start", justifyContent: "flex-start" }}
+          >
+            <ProductThumb url={product.thumbnailUrl} alt={product.name} size={64} />
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="overline" component="div" sx={{ lineHeight: 1.4 }}>
+                {product.brandName}
+              </Typography>
+              <Typography sx={{ fontWeight: 600 }}>{product.name}</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                {variantsLabel(product.variantCount)} · {priceFrom(product)}
+              </Typography>
+              <ProductStatus {...product} />
+            </Box>
           </CardActionArea>
         </Card>
       ))}

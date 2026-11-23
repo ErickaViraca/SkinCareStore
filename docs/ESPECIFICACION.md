@@ -110,7 +110,10 @@ docs/         especificación y decisiones
 - `price_auto_raised_at` — aviso pendiente cuando el sistema subió el precio solo
 - `published, archived_at`
 
-**product_images** — `id, product_id, variant_id (opcional), url, alt, order`
+**product_images** — `id, product_id, variant_id (opcional), url, storage_key, alt, sort_order`
+- Hasta **10 fotos por producto**; la primera es la principal. Se ordenan con flechas (arrastrar y soltar, más adelante).
+- El navegador achica cada foto (1600 px como máximo, WebP) y la sube **directo a R2** con un enlace firmado de 5 minutos; después el panel la comprueba y la registra.
+- Una foto puede asignarse a un tono (`variant_id`); sin tono vale para todo el producto. Borrar una foto borra también su archivo.
 
 **price_changes** 🔒 — historial: `variant_id, old_price, new_price, reason (manual | auto_cost), created_by, created_at`
 
@@ -569,3 +572,4 @@ Las credenciales de producción nunca están disponibles en los tests ni en GitH
 | 39 | Producto nuevo con su primera variante en la misma pantalla; SKU automático y editable (código de fábrica) |
 | 40 | Estado público "Disponible pronto" con casilla manual por producto; sin stock y sin casilla = "Agotado" |
 | 41 | Se puede publicar un producto sin fotos, con aviso en el panel |
+| 42 | Fotos: hasta 10 por producto, ordenadas con flechas, achicadas en el navegador y subidas directo a R2 |
