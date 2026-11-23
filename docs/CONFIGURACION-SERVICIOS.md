@@ -14,7 +14,7 @@ Pasos para crear los servicios que usa el panel. Son las mismas cuentas que el p
    - **Región:** *AWS São Paulo (sa-east-1)*, la más cercana a Bolivia. Vercel usa la misma región (la fija `vercel.json`).
 2. El proyecto se crea con la rama **`main`**: será **producción**.
 3. **Branches → Create branch**, con nombre `desarrollo` y creada desde `main`. Es la copia para probar mientras se programa.
-4. En cada rama, **Connect** → copia la *connection string* del rol dueño (`neondb_owner`). Guárdalas como:
+4. En cada rama, **Connect** → copia la *connection string* del rol dueño (`soleil_owner`). Guárdalas como:
    - `DATABASE_URL` de **desarrollo**;
    - `DATABASE_URL` de **producción**.
 5. No hace falta crear tablas: las migraciones las crean (`npm run db:migrate`). Los usuarios `soleil_app` y `soleil_web` los crea una migración; sus contraseñas se asignan después, con los pasos que te pasaré en ese momento.
@@ -79,7 +79,7 @@ Cada vez que se mergea un PR a `main`, Vercel publica el panel solo. Antes de co
 1. [vercel.com](https://vercel.com) → **Add New → Project** → importar `ErickaViraca/SkinCareStore`. Si no aparece, **Adjust GitHub App Permissions** y darle acceso a ese repositorio.
 2. Vercel detecta Next.js. **No cambiar** los comandos de build: los define `vercel.json` (también la región São Paulo, `gru1`, junto a Neon).
 3. Antes de **Deploy**, en **Environment Variables**, cargar solo para **Production**:
-   - `DATABASE_URL_MIGRATIONS`: en Neon, rama `main` → **Connect** → rol `neondb_owner`, con **Connection pooling desactivado** (el host **sin** `-pooler`).
+   - `DATABASE_URL_MIGRATIONS`: en Neon, rama `main` → **Connect** → rol `soleil_owner`, con **Connection pooling desactivado** (el host **sin** `-pooler`).
    - `AUTH_SECRET`: una clave al azar de 40 caracteres generada con el gestor de contraseñas.
    - `AUTH_GOOGLE_ID` y `AUTH_GOOGLE_SECRET`: los del cliente de Google.
 4. **Deploy.** Este primer despliegue crea las tablas, las vistas y los usuarios `soleil_app` y `soleil_web`. El panel abre en `https://<proyecto>.vercel.app`, pero todavía no deja ingresar (faltan B, C y D).
@@ -96,8 +96,10 @@ INSERT INTO admin_users (email, name) VALUES
   ('email-de-vanessa@gmail.com', 'Vanessa');
 ```
 
+> El dueño de la base es `soleil_owner` (en otros proyectos Neon lo llama `neondb_owner`). Si Neon se conectó desde Vercel (integración), Vercel ya trae `DATABASE_URL` y `DATABASE_URL_UNPOOLED` por ambiente con el dueño: en el paso C se **edita** la `DATABASE_URL` de Production en vez de crearla. Las de Development no se tocan (no se despliegan).
+
 **C. Vercel: conexión del panel.**
-1. En Neon, rama `main` → **Connect** → con **Connection pooling activado** (host con `-pooler`). Copiar la cadena y reemplazar `neondb_owner:...@` por `soleil_app:LA_CONTRASEÑA@`.
+1. En Neon, rama `main` → **Connect** → con **Connection pooling activado** (host con `-pooler`). Copiar la cadena y reemplazar `soleil_owner:...@` por `soleil_app:LA_CONTRASEÑA@`.
 2. En Vercel, **Settings → Environment Variables** → agregar `DATABASE_URL` con ese valor, solo para **Production**.
 3. **Deployments** → el último → **⋯ → Redeploy**.
 
@@ -116,7 +118,7 @@ INSERT INTO admin_users (email, name) VALUES
 | Variable | Desarrollo (`.env.local`) | Producción (Vercel) |
 |---|---|---|
 | `DATABASE_URL` | Rama `desarrollo` de Neon | Rama `main` de Neon, usuario `soleil_app`, con `-pooler` |
-| `DATABASE_URL_MIGRATIONS` | — | Rama `main` de Neon, usuario `neondb_owner`, sin `-pooler` |
+| `DATABASE_URL_MIGRATIONS` | — | Rama `main` de Neon, usuario `soleil_owner`, sin `-pooler` |
 | `AUTH_SECRET` | Clave al azar (40 caracteres) | Otra distinta |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Del cliente OAuth | Los mismos |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | Del token de R2 | Los mismos |

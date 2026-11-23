@@ -2,7 +2,7 @@
  * Aplica las migraciones pendientes antes de compilar en Vercel
  * (docs/CONFIGURACION-SERVICIOS.md §4).
  *
- * Usa DATABASE_URL_MIGRATIONS: la conexión del dueño de la base (`neondb_owner`),
+ * Usa DATABASE_URL_MIGRATIONS: la conexión del dueño de la base (`soleil_owner`),
  * que puede crear tablas. La aplicación, en cambio, usa DATABASE_URL con el
  * usuario limitado `soleil_app`.
  *
