@@ -11,7 +11,7 @@ Pasos para crear los servicios que usa el panel. Son las mismas cuentas que el p
 1. Entra a [console.neon.tech](https://console.neon.tech) → **New Project**.
    - **Nombre:** `soleil`.
    - **Postgres:** 17 (la misma versión de los tests).
-   - **Región:** *AWS São Paulo (sa-east-1)*, la más cercana a Bolivia. Vercel debe usar la misma región (paso 4 de Vercel, más adelante).
+   - **Región:** *AWS São Paulo (sa-east-1)*, la más cercana a Bolivia. Vercel usa la misma región (la fija `vercel.json`).
 2. El proyecto se crea con la rama **`main`**: será **producción**.
 3. **Branches → Create branch**, con nombre `desarrollo` y creada desde `main`. Es la copia para probar mientras se programa.
 4. En cada rama, **Connect** → copia la *connection string* del rol dueño (`neondb_owner`). Guárdalas como:
@@ -71,14 +71,55 @@ Los nombres van en español (como aparecen con la consola en español) y, entre 
    - Guarda el **Access Key ID**, el **Secret Access Key** y el **Account ID** (aparece en la página de R2).
 5. Guarda también la URL pública de `soleil-fotos` (la de r2.dev).
 
-## 4. Qué se carga en cada lugar
+## 4. Vercel (el panel en línea)
+
+Cada vez que se mergea un PR a `main`, Vercel publica el panel solo. Antes de compilar aplica las migraciones pendientes en la base de producción (`scripts/migrate-on-deploy.ts`), así nunca queda código nuevo con tablas viejas.
+
+**A. Crear el proyecto**
+1. [vercel.com](https://vercel.com) → **Add New → Project** → importar `ErickaViraca/SkinCareStore`. Si no aparece, **Adjust GitHub App Permissions** y darle acceso a ese repositorio.
+2. Vercel detecta Next.js. **No cambiar** los comandos de build: los define `vercel.json` (también la región São Paulo, `gru1`, junto a Neon).
+3. Antes de **Deploy**, en **Environment Variables**, cargar solo para **Production**:
+   - `DATABASE_URL_MIGRATIONS`: en Neon, rama `main` → **Connect** → rol `neondb_owner`, con **Connection pooling desactivado** (el host **sin** `-pooler`).
+   - `AUTH_SECRET`: una clave al azar de 40 caracteres generada con el gestor de contraseñas.
+   - `AUTH_GOOGLE_ID` y `AUTH_GOOGLE_SECRET`: los del cliente de Google.
+4. **Deploy.** Este primer despliegue crea las tablas, las vistas y los usuarios `soleil_app` y `soleil_web`. El panel abre en `https://<proyecto>.vercel.app`, pero todavía no deja ingresar (faltan B, C y D).
+5. Opcional: **Settings → Domains** → editar el subdominio `*.vercel.app` por uno más claro, por ejemplo `soleil-panel.vercel.app` (gratis).
+
+**B. Neon: usuario del panel y administradoras.** En Neon, rama `main` → **SQL Editor**:
+```sql
+-- Contraseña: 32 caracteres, solo letras y números (generada con el gestor de contraseñas).
+ALTER ROLE soleil_app WITH LOGIN PASSWORD 'LA_CONTRASEÑA';
+
+-- Quiénes pueden entrar al panel (los mismos emails que en Usuarios de prueba de Google).
+INSERT INTO admin_users (email, name) VALUES
+  ('tu-email@gmail.com', 'Ericka'),
+  ('email-de-vanessa@gmail.com', 'Vanessa');
+```
+
+**C. Vercel: conexión del panel.**
+1. En Neon, rama `main` → **Connect** → con **Connection pooling activado** (host con `-pooler`). Copiar la cadena y reemplazar `neondb_owner:...@` por `soleil_app:LA_CONTRASEÑA@`.
+2. En Vercel, **Settings → Environment Variables** → agregar `DATABASE_URL` con ese valor, solo para **Production**.
+3. **Deployments** → el último → **⋯ → Redeploy**.
+
+**D. Google: la dirección del panel.** En **Clientes** → tu cliente, agregar:
+- Origen autorizado de JavaScript: `https://<proyecto>.vercel.app`
+- URI de redireccionamiento: `https://<proyecto>.vercel.app/api/auth/callback/google`
+
+**E. Probar:** abrir `https://<proyecto>.vercel.app` → **Ingresar con Google**.
+
+**Después:**
+- Cada merge a `main` despliega solo (si falla la migración o el build, el panel anterior sigue en línea).
+- Cada PR recibe una **vista previa** con su propia dirección. Ahí todavía no se puede ingresar: Google solo acepta direcciones fijas. Se resolverá más adelante si hace falta.
+
+## 5. Qué se carga en cada lugar
 
 | Variable | Desarrollo (`.env.local`) | Producción (Vercel) |
 |---|---|---|
-| `DATABASE_URL` | Rama `desarrollo` de Neon | Rama `main` de Neon (luego, con el usuario `soleil_app`) |
-| `AUTH_SECRET` | `openssl rand -base64 32` | Otro distinto, generado igual |
+| `DATABASE_URL` | Rama `desarrollo` de Neon | Rama `main` de Neon, usuario `soleil_app`, con `-pooler` |
+| `DATABASE_URL_MIGRATIONS` | — | Rama `main` de Neon, usuario `neondb_owner`, sin `-pooler` |
+| `AUTH_SECRET` | Clave al azar (40 caracteres) | Otra distinta |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Del cliente OAuth | Los mismos |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | Del token de R2 | Los mismos |
 | `R2_PHOTOS_BUCKET`, `R2_INVOICES_BUCKET`, `R2_PUBLIC_URL` | `soleil-fotos`, `soleil-facturas`, URL r2.dev | Igual (luego, con el dominio propio) |
 
-El proyecto de Vercel y el dominio se configuran en la etapa 8 (producción).
+El dominio propio (`.com`) se configura en la etapa 8.
