@@ -52,6 +52,8 @@ export interface ProductListRow {
   readonly priceFromBs: string | null;
   /** Códigos, tonos y tamaños de las variantes, para el buscador. */
   readonly variantSearchText: string;
+  /** Foto principal (la primera), si tiene. */
+  readonly thumbnailUrl: string | null;
 }
 
 const columns = {
@@ -85,6 +87,9 @@ export function listProductsForPanel(db: Database): Promise<ProductListRow[]> {
         archivedAt: products.archivedAt,
         variantCount: count(productVariants.id),
         priceFromBs: min(productVariants.salePriceBs),
+        thumbnailUrl: sql<
+          string | null
+        >`(select ${productImages.url} from ${productImages} where ${productImages.productId} = ${products.id} order by ${productImages.sortOrder}, ${productImages.createdAt} limit 1)`,
         variantSearchText: sql<string>`coalesce(string_agg(concat_ws(' ', ${productVariants.sku}, ${productVariants.shade}, ${productVariants.presentation}, ${productVariants.barcode}), ' '), '')`,
       })
       .from(products)
@@ -106,13 +111,6 @@ export async function isProductSlugTaken(db: Database, slug: string, exceptId?: 
   const condition = exceptId ? and(eq(products.slug, slug), ne(products.id, exceptId)) : eq(products.slug, slug);
   const rows = await run("isSlugTaken", () => db.select({ id: products.id }).from(products).where(condition).limit(1));
   return rows.length > 0;
-}
-
-export async function countProductImages(db: Database, productId: string): Promise<number> {
-  const rows = await run("countImages", () =>
-    db.select({ total: count() }).from(productImages).where(eq(productImages.productId, productId)),
-  );
-  return rows[0]?.total ?? 0;
 }
 
 export async function insertProduct(db: Database, values: ProductValues): Promise<ProductRow> {

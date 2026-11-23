@@ -71,6 +71,13 @@
       "when": 1795399971475,
       "tag": "0009_public_catalog_coming_soon",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795402827757,
+      "tag": "0010_product_images_storage_key",
+      "breakpoints": true
     }
   ]
 }

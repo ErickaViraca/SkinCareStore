@@ -63,7 +63,7 @@ Los nombres van en español (como aparecen con la consola en español) y, entre 
        }
      ]
      ```
-     Cuando exista el dominio del panel, se agrega a `AllowedOrigins`.
+     Agrega también la dirección del panel en Vercel (`https://soleil-admin-panel.vercel.app`) y, más adelante, el dominio propio.
 3. **Create bucket** `soleil-facturas`. **Sin acceso público**: las facturas se ven solo con enlaces temporales desde el panel.
 4. **R2 → Manage API tokens → Create API token:**
    - Permiso: **Object Read & Write**.
@@ -122,6 +122,7 @@ INSERT INTO admin_users (email, name) VALUES
 | `AUTH_SECRET` | Clave al azar (40 caracteres) | Otra distinta |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Del cliente OAuth | Los mismos |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | Del token de R2 | Los mismos |
-| `R2_PHOTOS_BUCKET`, `R2_INVOICES_BUCKET`, `R2_PUBLIC_URL` | `soleil-fotos`, `soleil-facturas`, URL r2.dev | Igual (luego, con el dominio propio) |
+| `R2_PHOTOS_BUCKET`, `R2_PUBLIC_URL` | `soleil-fotos`, URL r2.dev sin `/` al final | Igual (luego, con el dominio propio) |
+| `R2_INVOICES_BUCKET` | `soleil-facturas` (etapa 4) | Igual |
 
 El dominio propio (`.com`) se configura en la etapa 8.

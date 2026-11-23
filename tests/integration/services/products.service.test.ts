@@ -92,7 +92,7 @@ describe("servicio de productos y variantes", () => {
         averageCostBs: null,
         minimumPriceBs: null,
       });
-      expect(detail.imageCount).toBe(0);
+      expect(detail.images).toEqual([]);
     });
 
     it("numera el slug y el SKU sugerido si ya existen", async () => {

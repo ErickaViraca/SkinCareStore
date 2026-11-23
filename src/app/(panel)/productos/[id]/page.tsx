@@ -12,7 +12,14 @@ import {
   updateProductAction,
   updateVariantAction,
 } from "@/server/controllers/products.actions";
-import { loadProductDetail, loadProductFormOptions } from "@/server/controllers/products.controller";
+import {
+  assignPhotoVariantAction,
+  deletePhotoAction,
+  movePhotoAction,
+  preparePhotoUploadAction,
+  registerPhotoAction,
+} from "@/server/controllers/photos.actions";
+import { loadPhotosEnabled, loadProductDetail, loadProductFormOptions } from "@/server/controllers/products.controller";
 
 export const metadata = { title: "Producto · Soleil" };
 
@@ -30,7 +37,11 @@ async function ProductSection({
   readonly params: PageProps<"/productos/[id]">["params"];
 }): Promise<React.JSX.Element> {
   const { id } = await params;
-  const [product, options] = await Promise.all([loadProductDetail(id), loadProductFormOptions()]);
+  const [product, options, photosEnabled] = await Promise.all([
+    loadProductDetail(id),
+    loadProductFormOptions(),
+    loadPhotosEnabled(),
+  ]);
   const brandName = options.brands.find((brand) => brand.id === product.brandId)?.label;
   return (
     <>
@@ -40,6 +51,14 @@ async function ProductSection({
         brands={withCurrent(options.brands, product.brandId, "Marca archivada")}
         categories={withCurrent(options.categories, product.categoryId, "Categoría archivada")}
         productActions={{ update: updateProductAction, archive: archiveProductAction, restore: restoreProductAction }}
+        photosEnabled={photosEnabled}
+        photoActions={{
+          prepare: preparePhotoUploadAction,
+          register: registerPhotoAction,
+          move: movePhotoAction,
+          assign: assignPhotoVariantAction,
+          remove: deletePhotoAction,
+        }}
         variantActions={{
           add: addVariantAction,
           update: updateVariantAction,

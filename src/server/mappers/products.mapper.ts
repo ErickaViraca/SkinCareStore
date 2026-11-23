@@ -37,6 +37,7 @@ export function toProductListItemDto(row: ProductListRow): ProductListItemDto {
     variantCount: row.variantCount,
     priceFromCents: toCents(row.priceFromBs),
     searchText: row.variantSearchText,
+    thumbnailUrl: row.thumbnailUrl,
   };
 }
 
@@ -60,7 +61,7 @@ export function toVariantDto(row: VariantDetailRow): VariantDto {
   };
 }
 
-export function toProductDetailDto({ product, variants, imageCount }: ProductDetail): ProductDetailDto {
+export function toProductDetailDto({ product, variants, images }: ProductDetail): ProductDetailDto {
   return {
     id: product.id,
     name: product.name,
@@ -73,7 +74,7 @@ export function toProductDetailDto({ product, variants, imageCount }: ProductDet
     featured: product.featured,
     comingSoon: product.comingSoon,
     archived: product.archivedAt !== null,
-    imageCount,
+    photos: images.map((image) => ({ id: image.id, url: image.url, alt: image.alt, variantId: image.variantId })),
     variants: variants.map(toVariantDto),
   };
 }
