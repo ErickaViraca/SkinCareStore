@@ -34,7 +34,7 @@ export const NAV_GROUPS: readonly (readonly NavItem[])[] = [
     { href: "/ventas", label: "Ventas", icon: ReceiptLongOutlined, available: false },
   ],
   [
-    { href: "/productos", label: "Productos", icon: SpaOutlined, available: false },
+    { href: "/productos", label: "Productos", icon: SpaOutlined, available: true },
     { href: "/catalogo", label: "Marcas y categorías", icon: CategoryOutlined, available: true },
     { href: "/compras", label: "Compras", icon: ShoppingCartOutlined, available: false },
     { href: "/inventario", label: "Inventario", icon: WarehouseOutlined, available: false },
@@ -53,7 +53,7 @@ export const NAV_GROUPS: readonly (readonly NavItem[])[] = [
 export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   { href: "/", label: "Inicio", icon: HomeOutlined, available: true },
   { href: "/ventas/nueva", label: "Vender", icon: PointOfSaleOutlined, available: false },
-  { href: "/productos", label: "Productos", icon: Inventory2Outlined, available: false },
+  { href: "/productos", label: "Productos", icon: Inventory2Outlined, available: true },
 ];
 
 export const MORE_ICON = MenuOutlined;

@@ -6,9 +6,10 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import { useActionState } from "react";
 
 import { type MutationResult } from "@/lib/action-state";
+
+import { type FormAttempt, useFormAttempt } from "./use-form-attempt";
 
 interface FormDialogProps {
   readonly open: boolean;
@@ -23,42 +24,12 @@ interface FormDialogProps {
 }
 
 /**
- * Último envío rechazado: el resultado (errores) y lo que se había escrito.
- * React vacía el formulario después de enviarlo; con `values` los campos
- * vuelven a mostrar lo escrito para que la usuaria solo corrija el error.
- */
-export interface FormAttempt {
-  readonly result: MutationResult;
-  readonly values: Readonly<Record<string, string>>;
-  /** Cambia en cada envío; sirve de `key` para que los campos tomen `values`. */
-  readonly count: number;
-}
-
-function formValues(formData: FormData): Record<string, string> {
-  const values: Record<string, string> = {};
-  formData.forEach((value, key) => {
-    if (typeof value === "string") values[key] = value;
-  });
-  return values;
-}
-
-/**
  * Ventana con un formulario corto (crear o editar).
  * Usa `useActionState` (guía de frontend §4): mientras se envía, el botón se
  * deshabilita; si el servidor rechaza, muestra el mensaje y los errores por campo.
  */
 export function FormDialog(props: FormDialogProps): React.JSX.Element {
-  const [attempt, submit, pending] = useActionState(
-    async (previous: FormAttempt | null, formData: FormData): Promise<FormAttempt | null> => {
-      const result = await props.onSubmit(formData);
-      if (result.ok) {
-        props.onSuccess();
-        return null;
-      }
-      return { result, values: formValues(formData), count: (previous?.count ?? 0) + 1 };
-    },
-    null,
-  );
+  const [attempt, submit, pending] = useFormAttempt(props.onSubmit, props.onSuccess);
   const result = attempt?.result;
 
   return (

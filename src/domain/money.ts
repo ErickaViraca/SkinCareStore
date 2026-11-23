@@ -49,3 +49,17 @@ export function toDbMoney(amount: Cents): string {
 export function formatBs(amount: Cents): string {
   return `Bs ${DISPLAY_FORMAT.format(amount / 100)}`;
 }
+
+const INPUT_MONEY_PATTERN = /^(\d{1,9})(?:[.,](\d{1,2}))?$/;
+
+/**
+ * Convierte lo que escribe la usuaria en un formulario a centavos:
+ * "289,90" o "289.90" → 28990; "250" → 25000. Sin signo ni separador de miles.
+ * Devuelve `null` si el texto no es un monto válido.
+ */
+export function parseMoneyInput(text: string): Cents | null {
+  const match = INPUT_MONEY_PATTERN.exec(text.trim());
+  if (!match) return null;
+  const [, whole = "0", fraction = ""] = match;
+  return cents(Number(whole) * 100 + Number(fraction.padEnd(2, "0")));
+}

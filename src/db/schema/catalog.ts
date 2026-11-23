@@ -52,11 +52,22 @@ export const products = pgTable(
       .default(sql`'{}'::text[]`),
     published: boolean("published").notNull().default(false),
     featured: boolean("featured").notNull().default(false),
+    // "Disponible pronto": casilla manual. Sin stock, la página pública muestra
+    // "Disponible pronto" en vez de "Agotado". El sistema nunca la cambia solo.
+    comingSoon: boolean("coming_soon").notNull().default(false),
     archivedAt: timestampTz("archived_at"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (table) => [index("products_brand_id_idx").on(table.brandId), index("products_category_id_idx").on(table.categoryId)],
+  (table) => [
+    index("products_brand_id_idx").on(table.brandId),
+    index("products_category_id_idx").on(table.categoryId),
+    // Solo los códigos de la lista fija (src/domain/skin-types.ts).
+    check(
+      "products_skin_types_known",
+      sql`${table.skinTypes} <@ ARRAY['oily', 'dry', 'combination', 'sensitive', 'acne_prone', 'hyperpigmentation', 'mature', 'all']::text[]`,
+    ),
+  ],
 );
 
 /** Variantes: lo que se vende y se cuenta, con su tono, tamaño y precio (§3.2). */

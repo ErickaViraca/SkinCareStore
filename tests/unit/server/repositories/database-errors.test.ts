@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { ConflictError, DatabaseError, NotFoundError, UnexpectedError } from "@/server/errors/app-error";
+import {
+  ConflictError,
+  DatabaseError,
+  NotFoundError,
+  UnexpectedError,
+  ValidationError,
+} from "@/server/errors/app-error";
 import { type Logger } from "@/server/logger/logger";
 import { firstOrThrow, withDatabaseErrors } from "@/server/repositories/database-errors";
 
@@ -27,6 +33,26 @@ describe("withDatabaseErrors", () => {
     expect(error).toBeInstanceOf(ConflictError);
     expect((error as ConflictError).userMessage).toBe("Repetido.");
     expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it("traduce una regla CHECK conocida a un error del campo, sin registrarlo", async () => {
+    const logger = fakeLogger();
+    const driverError = Object.assign(new Error("check"), { code: "23514", constraint: "price_rule" });
+    const error: unknown = await withDatabaseErrors(
+      { ...options(logger), checkViolations: { price_rule: { field: "salePrice", message: "Precio bajo." } } },
+      () => Promise.reject(new Error("Failed query", { cause: driverError })),
+    ).catch((thrown: unknown) => thrown);
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).fieldErrors).toEqual({ salePrice: "Precio bajo." });
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it("una regla CHECK desconocida es una falla de la base", async () => {
+    const driverError = Object.assign(new Error("check"), { code: "23514", constraint: "otra" });
+    await expect(withDatabaseErrors(options(fakeLogger()), () => Promise.reject(driverError))).rejects.toBeInstanceOf(
+      DatabaseError,
+    );
   });
 
   it("cualquier otra falla se registra una vez y se relanza como DatabaseError", async () => {

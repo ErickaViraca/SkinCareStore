@@ -93,11 +93,16 @@ docs/         especificación y decisiones
 
 **products** (lo común a todas sus variantes)
 - `id, name, slug, brand_id, category_id, description, usage_instructions`
-- `skin_types text[]` (grasa, seca, mixta, sensible, con acné, con manchas, madura, todo tipo)
-- `published, featured, archived_at, created_at, updated_at`
+- `skin_types text[]`: códigos fijos `oily` (grasa), `dry` (seca), `combination` (mixta), `sensitive` (sensible), `acne_prone` (con acné), `hyperpigmentation` (con manchas), `mature` (madura), `all` (todo tipo). La base rechaza otros valores.
+- `published, featured, coming_soon, archived_at, created_at, updated_at`
+- `coming_soon` ("Disponible pronto"): casilla **manual**. Sin stock, la página pública muestra "Disponible pronto" en vez de "Agotado"; con stock no cambia nada. El sistema nunca la marca ni la desmarca solo.
+- El `slug` se arma con marca + nombre (`la-roche-posay-effaclar-gel`); solo cambia si cambia el nombre o la marca.
+- Se crea en una sola pantalla con su **primera variante**; los demás tonos o tamaños se agregan desde la ficha. Se puede publicar sin fotos (con aviso).
 
 **product_variants** (lo que se vende y se cuenta)
 - `id, product_id, sku (único), barcode`
+- `sku`: si se deja vacío, se genera solo con marca + producto + tono/tamaño (`LRP-EFFACLAR-GEL-200ML`, numerado si ya existe). Se puede escribir a mano, por ejemplo el código de fábrica.
+- La última variante activa de un producto no se archiva: se archiva el producto.
 - `shade` (tono) y `presentation` (tamaño), ambos opcionales
 - `sale_price_bs` — precio de venta normal
 - `min_stock` — vacío = usa el de la tienda
@@ -425,6 +430,7 @@ ventas
   - **Disponible**
   - **Últimas unidades** (stock ≤ stock mínimo)
   - **Agotado**
+  - **Disponible pronto** (sin stock y con la casilla `coming_soon` del producto marcada)
 - **No muestra:** cantidad exacta de stock, vencimientos, lotes, costos, proveedores, compras, ventas, márgenes, dinero, capital ni gastos.
 - Los precios ya llegan validados (normal ≥ mínimo; oferta ≥ costo real).
 
@@ -560,3 +566,6 @@ Las credenciales de producción nunca están disponibles en los tests ni en GitH
 | 36 | Bocetos aprobados del inicio, lista de productos y ficha de producto (docs/UI.md) |
 | 37 | Reordenar las tarjetas del inicio arrastrándolas queda para más adelante |
 | 38 | Categorías con un solo nivel de subcategorías; marcas y categorías se archivan, nunca se borran (§3.2) |
+| 39 | Producto nuevo con su primera variante en la misma pantalla; SKU automático y editable (código de fábrica) |
+| 40 | Estado público "Disponible pronto" con casilla manual por producto; sin stock y sin casilla = "Agotado" |
+| 41 | Se puede publicar un producto sin fotos, con aviso en el panel |

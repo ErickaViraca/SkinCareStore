@@ -84,6 +84,26 @@ describe("vistas", () => {
       expect(await availability(t, onlyExpired)).toBe("out_of_stock");
     });
 
+    it("sin stock muestra 'Disponible pronto' solo si la casilla del producto está marcada", async () => {
+      const soonProduct = await createProduct(t.client);
+      await t.client.query("UPDATE products SET coming_soon = true WHERE id = $1", [soonProduct]);
+      const comingSoon = await createVariant(t.client, { productId: soonProduct, minStock: 2 });
+      const withStock = await createVariant(t.client, { productId: soonProduct, minStock: 2 });
+      await createLotWithStock(t.client, withStock, { quantity: 5 });
+
+      expect(await availability(t, comingSoon)).toBe("coming_soon");
+      // Con stock, la casilla no cambia nada: se ve disponible.
+      expect(await availability(t, withStock)).toBe("available");
+    });
+
+    it("rechaza tipos de piel que no están en la lista", async () => {
+      const productId = await createProduct(t.client);
+      await expect(
+        t.client.query("UPDATE products SET skin_types = ARRAY['grasa'] WHERE id = $1", [productId]),
+      ).rejects.toThrow(/products_skin_types_known/);
+      await t.client.query("UPDATE products SET skin_types = ARRAY['oily', 'sensitive'] WHERE id = $1", [productId]);
+    });
+
     it("oculta variantes y productos no publicados o archivados", async () => {
       const unpublishedProduct = await createProduct(t.client, { published: false });
       const hiddenByProduct = await createVariant(t.client, { productId: unpublishedProduct });

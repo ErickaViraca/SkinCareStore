@@ -14,7 +14,19 @@ export type MutationResult =
 /** Una acción del servidor que la pantalla puede llamar. */
 export type Mutation = (input: unknown) => Promise<MutationResult>;
 
-/** Error de un campo del formulario, si lo hay. */
-export function fieldError(result: MutationResult | null | undefined, field: string): string | undefined {
-  return result && !result.ok ? result.error.fieldErrors?.[field] : undefined;
+/**
+ * Error de un campo del formulario, si lo hay. Acepta varios nombres porque
+ * un mismo campo puede venir como "variant.salePrice" (validación) o
+ * "salePrice" (regla del servidor).
+ */
+export function fieldError(result: MutationResult | null | undefined, ...fields: string[]): string | undefined {
+  if (!result || result.ok) return undefined;
+  for (const field of fields) {
+    const message = result.error.fieldErrors?.[field];
+    if (message) return message;
+  }
+  return undefined;
 }
+
+/** Respuesta de una acción que además devuelve datos (por ejemplo, el id creado). */
+export type MutationResultWith<T> = { readonly ok: true; readonly data: T } | Extract<MutationResult, { ok: false }>;
