@@ -1,6 +1,6 @@
 import "server-only";
 
-import { AppError, ConflictError, DatabaseError, UnexpectedError } from "@/server/errors/app-error";
+import { AppError, ConflictError, DatabaseError, UnexpectedError, ValidationError } from "@/server/errors/app-error";
 import { type Logger } from "@/server/logger/logger";
 
 /**
@@ -11,15 +11,26 @@ import { type Logger } from "@/server/logger/logger";
 
 /** Código de Postgres para "valor repetido en una columna única". */
 const UNIQUE_VIOLATION = "23505";
+/** Código de Postgres para "no cumple una regla CHECK" (también lo usan nuestros triggers). */
+const CHECK_VIOLATION = "23514";
 
-/** Busca el código de Postgres recorriendo la cadena de causas (Drizzle envuelve el error del driver). */
-function postgresCode(error: unknown): string | null {
+/** El error del driver de Postgres, buscado en la cadena de causas (Drizzle lo envuelve). */
+function driverError(error: unknown): { code: string; constraint: string | null } | null {
   let current: unknown = error;
   for (let depth = 0; depth < 5 && typeof current === "object" && current !== null; depth++) {
-    if ("code" in current && typeof current.code === "string") return current.code;
+    if ("code" in current && typeof current.code === "string") {
+      const constraint = "constraint" in current && typeof current.constraint === "string" ? current.constraint : null;
+      return { code: current.code, constraint };
+    }
     current = "cause" in current ? current.cause : null;
   }
   return null;
+}
+
+/** Mensaje para la usuaria cuando la base rechaza un dato por una regla con nombre. */
+interface CheckViolationMessage {
+  readonly field: string;
+  readonly message: string;
 }
 
 interface TranslateOptions {
@@ -28,6 +39,8 @@ interface TranslateOptions {
   readonly operation: string;
   /** Mensaje para la usuaria si se repite un valor único (por ejemplo, el nombre). */
   readonly conflictMessage: string;
+  /** Reglas CHECK conocidas (por nombre) → campo y mensaje para el formulario. */
+  readonly checkViolations?: Readonly<Record<string, CheckViolationMessage>>;
 }
 
 /** Ejecuta una consulta y traduce sus errores. */
@@ -36,13 +49,19 @@ export async function withDatabaseErrors<T>(options: TranslateOptions, query: ()
     return await query();
   } catch (error: unknown) {
     if (error instanceof AppError) throw error;
-    if (postgresCode(error) === UNIQUE_VIOLATION) {
+    const driver = driverError(error);
+    if (driver?.code === UNIQUE_VIOLATION) {
       throw new ConflictError(options.conflictMessage, { cause: error, context: { table: options.table } });
+    }
+    const known =
+      driver?.code === CHECK_VIOLATION && driver.constraint ? options.checkViolations?.[driver.constraint] : undefined;
+    if (known) {
+      throw new ValidationError(known.message, { [known.field]: known.message }, { cause: error });
     }
     options.logger.error("Falla de la base de datos", {
       table: options.table,
       operation: options.operation,
-      code: postgresCode(error),
+      code: driver?.code ?? null,
       error,
     });
     const databaseError = new DatabaseError({ cause: error, context: { table: options.table } });

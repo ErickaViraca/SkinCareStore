@@ -1,7 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-import { cents, formatBs, parseDbMoney, toDbMoney } from "@/domain/money";
+import { cents, formatBs, parseDbMoney, parseMoneyInput, toDbMoney } from "@/domain/money";
 
 describe("cents", () => {
   it("acepta enteros", () => {
@@ -54,5 +54,21 @@ describe("formatBs", () => {
     expect(formatBs(cents(123450))).toBe("Bs 1.234,50");
     expect(formatBs(cents(28990))).toBe("Bs 289,90");
     expect(formatBs(cents(0))).toBe("Bs 0,00");
+  });
+});
+
+describe("parseMoneyInput", () => {
+  it.each([
+    ["289,90", 28990],
+    ["289.90", 28990],
+    ["250", 25000],
+    [" 0.5 ", 50],
+    ["0", 0],
+  ])("convierte %j en %i centavos", (text, expected) => {
+    expect(parseMoneyInput(text)).toBe(expected);
+  });
+
+  it.each(["", "-10", "1.234,50", "12.345", "abc", "1,2,3"])("rechaza %j", (text) => {
+    expect(parseMoneyInput(text)).toBeNull();
   });
 });

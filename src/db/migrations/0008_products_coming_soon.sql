@@ -1,0 +1,2 @@
+ALTER TABLE "products" ADD COLUMN "coming_soon" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "products" ADD CONSTRAINT "products_skin_types_known" CHECK ("products"."skin_types" <@ ARRAY['oily', 'dry', 'combination', 'sensitive', 'acne_prone', 'hyperpigmentation', 'mature', 'all']::text[]);

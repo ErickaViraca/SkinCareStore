@@ -42,6 +42,11 @@ export function listBrandsWithProductCount(db: Database): Promise<BrandListRow[]
   );
 }
 
+export async function findBrandById(db: Database, id: string): Promise<BrandRow | null> {
+  const rows = await run("findById", () => db.select(columns).from(brands).where(eq(brands.id, id)).limit(1));
+  return rows[0] ?? null;
+}
+
 export async function insertBrand(db: Database, values: { name: string; slug: string }): Promise<BrandRow> {
   const rows = await run("insert", () => db.insert(brands).values(values).returning(columns));
   return firstOrThrow(rows, "brands");

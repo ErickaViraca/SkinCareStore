@@ -57,6 +57,20 @@
       "when": 1794867863773,
       "tag": "0007_public_settings_branding",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795399970725,
+      "tag": "0008_products_coming_soon",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795399971475,
+      "tag": "0009_public_catalog_coming_soon",
+      "breakpoints": true
     }
   ]
 }
